@@ -1,38 +1,39 @@
-General Algorithm
-    (or so it would appear to be):
+## General Overview
 
-Goal:
+### Goal:
+
 Output a file with:
-    - Canvas:
-            - width
-            - height
-            - Vector <Brushstroke> layers[num layers]
 
+- Canvas:
+    - width
+    - height
+    - Vector <Brushstroke> layers[num layers]
             
-    - Brushstroke:
-            - Point(x,y) anchor
-            - double Orientation (radians)
-            - double Length 1 
-            - double Length 2
-            - double Width
-            - double opacity (0-1)
-            - Color color
+- Brushstroke:
+    - Point(x,y) anchor
+    - double Orientation (radians)
+    - double Length 1 
+    - double Length 2
+    - double Width
+    - double opacity (0-1)
+    - Color color
 
-1) Read in source image and 'style' config file (which defines parameters for things like the number of layers, brush width/layer, max length/layer, etc)... 
+### Algorithm
 
-2) Initialize layers, each of size source * scale... 
-    For each layer, have:
-        - wb: brush width (maybe with some random variation?)
-        - wr: regen width (determine how densely packed the brushstrokes are)
-        - brush type (and texture...)
-        - palette reduction (although may be part of render instead)
-        - opacity? (or vary per brushstroke?)
+1. Read in source image and 'style' config file (which defines parameters for things like the number of layers, brush width/layer, max length/layer, etc)... 
 
-3) For each layer... 
-    i. Determine position of brushstrokes: 
-        Find all "anchor points" of each brushstroke...
-        This is a pseudorandom process (to limit artifacts), and attempts to 
-        fill all areas of size wr x wr with at least one stroke. 
+2. Initialize layers, each of size source * scale... 
+For each layer, have:
+    - wb: brush width (maybe with some random variation?)
+    - wr: regen width (determine how densely packed the brushstrokes are)
+    - brush type (and texture...)
+    - palette reduction (although may be part of render instead)
+    - opacity? (or vary per brushstroke?)
+
+3. For each layer... 
+  1. Determine position of brushstrokes: 
+        - Find all "anchor points" of each brushstroke...
+        - This is a pseudorandom process (to limit artifacts), and attempts to fill all areas of size wr x wr with at least one stroke. 
         - For k iterations... 
             - choose random (x,y) on the canvas
             - if there is no anchor in the wr x wr space... create a new brushstroke with
@@ -44,4 +45,4 @@ Output a file with:
                     in scanline method and see if it's empty... if yes, place your 
                     point there... 
 
-    ii. 
+  2. Do a thing
