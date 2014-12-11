@@ -8,6 +8,7 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 include (Common)
 
 find_package( OpenCV REQUIRED )
+find_package( YamlCPP REQUIRED )
 
 append_files( Headers "h" src/ src/canvas/)
 append_files( Sources "cpp" src/ src/canvas/)

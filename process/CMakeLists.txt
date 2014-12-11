@@ -7,6 +7,9 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 # Add cmake file with useful functions
 include (Common)
 
+find_package( OpenCV REQUIRED )
+find_package( YamlCPP REQUIRED )
+
 # TCLAP library is required
 find_package (TCLAP REQUIRED)
 if (TCLAP_FOUND)
