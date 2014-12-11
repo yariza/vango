@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
+#include "canvas/Brushstroke.h"
 
 using namespace cv;
 

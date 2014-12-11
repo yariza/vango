@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <tclap/CmdLine.h>
+#include "canvas/Brushstroke.h"
 
 using namespace TCLAP;
 using namespace std;
