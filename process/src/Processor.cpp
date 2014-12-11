@@ -28,6 +28,8 @@ void Processor::blurImage(double kernelwidth, double kernelheight){
 void Processor::doSobel(int kernelsize){
     Mat grayimg;
     cvtColor(image, grayimg, CV_RGB2GRAY);
+    Mat gradX, gradY;
+    Mat absgradX, absgradY;
     Mat grad;
     // Sobel(src, dst, int ddepth, int dx, int dy, int ksize, double scale, double delta, int borderType)
     // ddepth: output image depth, same as source if set to -1
@@ -37,8 +39,20 @@ void Processor::doSobel(int kernelsize){
     // scale: optional scaling of output
     // delta: optional value to add to results
     // borderType: extrapolation method at borders
-    Sobel(grayimg, grad, -1, 1, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
-    convertScaleAbs(grad, grad);
+    Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT);
+    //convertScaleAbs(gradX, absgradX);
+    absgradX = abs(gradX);
+    Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
+    //convertScaleAbs(gradY, absgradY);
+    absgradY = abs(gradY);
+
+    std::cout << (absgradX.size == absgradY.size) << std::endl; 
+    std::cout << gradX.depth() << std::endl;
+    std::cout << gradY.depth() << std::endl;
+    std::cout << absgradX.depth() << std::endl;
+    std::cout << absgradY.depth() << std::endl;
+
+    magnitude(absgradX, absgradY, grad);
 
     namedWindow("gradWind", CV_WINDOW_AUTOSIZE);
     imshow("gradWind", grad);
