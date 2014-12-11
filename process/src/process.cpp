@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <tclap/CmdLine.h>
 #include "canvas/Brushstroke.h"
+#include "Processor.h"
 
 using namespace TCLAP;
 using namespace std;
@@ -14,33 +15,24 @@ int main(int argc, char** argv)
   try {
 
     // Define the command line object.
-    CmdLine cmd("Command description message", ' ', "0.9");
+    CmdLine cmd("Vango Process", ' ', "0.001");
 
-    // Define a value argument and add it to the command line.
-    ValueArg<string> nameArg("n","name","Name to print",true,"homer","string");
-    cmd.add( nameArg );
+    ValueArg<string> styleFileName("s", "style", "style file defining stylistic parameters", true, "style.yaml", "string");
+    cmd.add(styleFileName);
 
-    // Define a switch and add it to the command line.
-    SwitchArg reverseSwitch("r","reverse","Print name backwards", false);
-    cmd.add( reverseSwitch );
+    ValueArg<string> imgFileName("i", "image", "image file to process", true, "image.png", "string");
+    cmd.add(imgFileName);
 
-    // Parse the args.
-    cmd.parse( argc, argv );
+    cmd.parse(argc, argv);
 
-    // Get the value parsed by each arg.
-    string name = nameArg.getValue();
-    bool reverseName = reverseSwitch.getValue();
+    string imgName = imgFileName.getValue();
+    string styleName = styleFileName.getValue();
 
-    // Do what you intend too...
-    if ( reverseName )
-      {
-        reverse(name.begin(),name.end());
-        cout << "My name (spelled backwards) is: " << name << endl;
-      }
-    else
-      cout << "My name is: " << name << endl;
+    std::cout << "run process on " << imgName << " as determined by " << styleName << "..." << std::endl;
 
+    Processor pro(imgName);
+    pro.display();
 
-  } catch (ArgException &e)  // catch any exceptions
+} catch (ArgException &e)  // catch any exceptions
     { cerr << "error: " << e.error() << " for arg " << e.argId() << endl; }
 }

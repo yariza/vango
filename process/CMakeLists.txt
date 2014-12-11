@@ -18,10 +18,13 @@ else (TCLAP_FOUND)
   message (SEND_ERROR "Unable to locate TCLAP")
 endif (TCLAP_FOUND)
 
+#OpenCV required
+find_package( OpenCV REQUIRED)
+
 append_files( Headers "h" src/ src/canvas/)
 append_files( Sources "cpp" src/ src/canvas/)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-add_executable ( render ${Headers} ${Templates} ${Sources})
+add_executable ( process ${Headers} ${Templates} ${Sources})
 
 target_link_libraries( render ${OpenCV_LIBS} ${YAMLCPP_LIBRARY})
