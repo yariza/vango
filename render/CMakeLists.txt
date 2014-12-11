@@ -16,4 +16,4 @@ append_files( Sources "cpp" src/ src/canvas/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_executable ( render ${Headers} ${Templates} ${Sources})
 
-target_link_libraries( render ${OpenCV_LIBS} )
+target_link_libraries( render ${OpenCV_LIBS} ${YAMLCPP_LIBRARY})
