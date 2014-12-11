@@ -10,6 +10,8 @@ public:
     Processor(std::string imgFile);
 
     virtual ~Processor();
+
+    virtual void blurImage(double kernelwidth = 11, double kernelheight = 11);
     
     virtual void display(std::string windowName="window");
 

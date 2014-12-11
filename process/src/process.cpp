@@ -33,6 +33,10 @@ int main(int argc, char** argv)
     Processor pro(imgName);
     pro.display();
 
+    pro.blurImage();
+    
+    pro.display();
+
 } catch (ArgException &e)  // catch any exceptions
     { cerr << "error: " << e.error() << " for arg " << e.argId() << endl; }
 }
