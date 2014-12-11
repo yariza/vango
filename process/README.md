@@ -84,3 +84,7 @@ For each layer, have:
     7. set (x1, y1) to (tempx, tempy)
     8. set lastSample to newSample
     9. go to step c.
+  8. Color...
+        - The article says to find all the pixels that lie under the stroke and average them... So basically 'rasterize' the width * length rectangle that is the stroke, find out the pixels it lands on, and average their colors... 
+        - May be easiest(?) to just draw the rectangle in openGL to get a mask and use that... wow what a hack. 
+        - For now... maybe just use the linearly interpolated color at the anchor point? Say look at the neighborhood around the anchor point
