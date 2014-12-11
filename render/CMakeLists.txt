@@ -10,6 +10,14 @@ include (Common)
 find_package( OpenCV REQUIRED )
 find_package( YamlCPP REQUIRED )
 
+# TCLAP library is required
+find_package (TCLAP REQUIRED)
+if (TCLAP_FOUND)
+  include_directories (${TCLAP_INCLUDE_PATH})
+else (TCLAP_FOUND)
+  message (SEND_ERROR "Unable to locate TCLAP")
+endif (TCLAP_FOUND)
+
 # boost
 set(Boost_ADDITIONAL_VERSIONS "1.51" "1.51.0")
 find_package(Boost 1.50 REQUIRED

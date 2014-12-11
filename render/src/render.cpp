@@ -1,21 +1,19 @@
 #include <stdio.h>
-#include <opencv2/opencv.hpp>
 #include <boost/filesystem.hpp>
-#include "canvas/Canvas.h"
-#include "canvas/Style.h"
+#include <tclap/CmdLine.h>
+#include "Renderer.h"
 
 using namespace cv;
+using namespace TCLAP;
 
-void test()
+std::string canvasFile;
+std::string styleFile;
+
+Renderer renderer;
+
+void debugLog(Canvas canvas, CanvasStyle style)
 {
-    YAML::Node node = YAML::Load(
-        "{width: 20, height: 40, layers: [[{anchor: [1.4, 2.6], angle: 0.3, length1: 3, length2: 4, width: 1.43, opacity: 0.3, color: [0.3, 0.4, 0.6]}]] }");
-    Canvas canvas = node.as<Canvas>();
-
-    std::string yamlPath = "assets/styles/test.yaml";
-    node = YAML::LoadFile(yamlPath);
-    CanvasStyle style = node.as<CanvasStyle>();
-    style.loadTextures(yamlPath);
+    style.loadTextures(styleFile);
 
     std::cout << canvas.width << std::endl;
     std::cout << canvas.height << std::endl;
@@ -43,26 +41,68 @@ void test()
     }
 }
 
+void parseCommandLine(int argc, char** argv)
+{
+    try {
+
+        CmdLine cmd("Vango Render", ' ', "0.001");
+
+        UnlabeledValueArg<std::string> canvasFileName("canvas", "canvas file to process", true, "", "canvas.yaml", "string");
+        cmd.add(canvasFileName);
+
+        ValueArg<std::string> styleFileName("s", "style", "style file defining stylistic parameters", true, "style.yaml", "string");
+        cmd.add(styleFileName);
+
+        cmd.parse(argc, argv);
+
+        canvasFile = canvasFileName.getValue();
+        styleFile = styleFileName.getValue();
+
+        // std::cout << "run process on " << canvasFile << " as determined by " << styleFile << "..." << std::endl;
+    }
+    catch (ArgException &e) { // catch any exceptions
+        std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
+        exit(1);
+    }
+}
+
+void loadCanvas()
+{
+    YAML::Node canvasNode = YAML::LoadFile(canvasFile);
+    Canvas canvas = canvasNode.as<Canvas>();
+
+    YAML::Node styleNode = YAML::LoadFile(styleFile);
+    CanvasStyle style = styleNode.as<CanvasStyle>();
+
+    renderer.load(canvas, style);
+}
+
 int main(int argc, char** argv )
 {
-    test();
+    // test();
 
-    if ( argc != 2 ) {
-        printf("usage: ./render <Image_Path>\n");
-        return -1;
-    }
+    parseCommandLine(argc, argv);
 
-    Mat image;
-    image = imread( argv[1], 1 );
+    loadCanvas();
 
-    if ( !image.data ) {
-        printf("No image data \n");
-        return -1;
-    }
-    namedWindow("render output", CV_WINDOW_AUTOSIZE );
-    imshow("render output", image);
+    debugLog(renderer.canvas, renderer.style);
 
-    waitKey(0);
+    // if ( argc != 2 ) {
+    //     printf("usage: ./render <Image_Path>\n");
+    //     return -1;
+    // }
 
-    return 0;
+    // Mat image;
+    // image = imread( argv[1], 1 );
+
+    // if ( !image.data ) {
+    //     printf("No image data \n");
+    //     return -1;
+    // }
+    // namedWindow("render output", CV_WINDOW_AUTOSIZE );
+    // imshow("render output", image);
+
+    // waitKey(0);
+
+    // return 0;
 }
