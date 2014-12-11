@@ -67,13 +67,108 @@ void Processor::doSobel(int kernelsize){
 }
 
 
-
 void Processor::display(std::string windowName){
-    namedWindow(windowName, WINDOW_AUTOSIZE);
+    namedWindow(windowName, WINDOW_NORMAL);
     imshow(windowName, image);
 
     waitKey(0);
     return;
+}
+
+
+void Processor::placeStrokes(){
+    // create binary matrix of size image
+    // actually... technically... of size image * scale... :(    
+    // brush width, wr. etc. all in terms of canvas size... 
+
+    int k = 1500; // try k random points
+    int stopthresh = 20; // if failed to place stopthresh times, stop algorithm 
+    double scale = 1;
+    double wr = 10; 
+    int countstop = 0;
+
+    Size imgSize = image.size();
+    Scalar s = 0;
+    Mat maskimg(imgSize.height*2, imgSize.width*2, CV_8UC1, s);
+    Size maskSize = maskimg.size();
+
+    std::vector<Brushstroke> strokes;
+    srand(time(NULL));
+
+    std::cout << countNonZero(maskimg) << std::endl;
+
+    for (int i = 0; i < k; ++i){
+        if(countstop > stopthresh){
+            std::cout << "breaking: reached stopthresh" << std::endl;
+            break;
+        }
+        std::cout << countstop << std::endl;
+        double r = rand()%maskSize.height;
+        double c = rand()%maskSize.width;                  
+       
+        double rs = std::max(0, (int)(r-wr/2.0)); 
+        double re = std::min((int)(r+wr/2.0), maskSize.height);
+        double cs = std::max(0, (int)(c-wr/2.0));
+        double ce = std::min((int)(c+wr/2.0), maskSize.width);
+
+        //std::cout << "trying " << r << ", " << c << std::endl;
+        if (countNonZero(maskimg(Range(rs, re), Range(cs, ce))) >= 1){
+            //std::cout << "rejected " << std::endl;
+            countstop++;
+            continue;
+        }
+        countstop = 0;
+        //std::cout << "setting " << std::endl;
+        maskimg.at<uchar>(r,c) = 255; 
+        
+        //std::cout << "r: " << rs << ", " << re << std::endl;
+        //std::cout << "c: " << cs << ", " << ce << std::endl;
+
+
+        //maskimg.at<uchar>(rs, cs) = 255;
+        //maskimg.at<uchar>(rs, ce) = 255;
+        //maskimg.at<uchar>(re, cs) = 255;
+        //maskimg.at<uchar>(re, ce) = 255;
+
+        //Vec3b col = image.at<Vec3b>(Point(x/2,y/2));
+    
+    }
+  
+    std::cout << countNonZero(maskimg) << std::endl;
+
+    namedWindow("gradWind", CV_WINDOW_NORMAL);
+    imshow("gradWind", maskimg);
+    waitKey(0); 
+
+    std::cout << "postprocessing... fill in the holes" << std::endl;
+
+
+    for (int i = 0; i < imgSize.height; ++i){
+        for(int j = 0; j < imgSize.width; ++j){
+    
+            if(maskimg.at<uchar>(i*2.0, j*2.0) > 100){
+                image.at<Vec3b>(i,j) = {0, 0, 0};
+            }
+
+        }
+    }
+
+//    display();
+
+
+/*
+    for (int i = 0; i < imgSize.height; ++i){
+        for(int j = 0; j < imgSize.width; ++j){
+
+            Vec3b col = image.at<Vec3b>(Point(j,i));
+                        
+            std::cout << (int)col[0] << ", " << (int)col[1] << ", " << (int)col[2] << std::endl;
+
+
+        }
+    }  
+*/
+
 }
 
 

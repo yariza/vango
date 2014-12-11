@@ -33,12 +33,13 @@ int main(int argc, char** argv)
     Processor pro(imgName);
     pro.display();
 
-    pro.doSobel();
+    //pro.doSobel();
 
-    pro.blurImage();
-    pro.display();
-    pro.doSobel();
+    //pro.blurImage();
+    //pro.display();
+    //pro.doSobel();
 
+    pro.placeStrokes();    
 
 } catch (ArgException &e)  // catch any exceptions
     { cerr << "error: " << e.error() << " for arg " << e.argId() << endl; }

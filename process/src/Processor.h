@@ -3,7 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 #include <stdio.h>
-//#include "canvas/Brushstroke.h"
+#include <time.h>
+#include "canvas/Brushstroke.h"
 
 class Processor {
 public:
@@ -16,6 +17,8 @@ public:
     virtual void doSobel(int kernelsize = 3);
     
     virtual void display(std::string windowName="window");
+
+    virtual void placeStrokes();
 
 private:
     cv::Mat image;
