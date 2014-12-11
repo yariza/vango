@@ -5,11 +5,15 @@
 
 using namespace cv;
 
-int main(int argc, char** argv )
+void test()
 {
     YAML::Node node = YAML::Load(
         "{width: 20, height: 40, layers: [[{anchor: [1.4, 2.6], angle: 0.3, length1: 3, length2: 4, width: 1.43, opacity: 0.3, color: [0.3, 0.4, 0.6]}]] }");
     Canvas canvas = node.as<Canvas>();
+
+    node = YAML::LoadFile("assets/styles/test.yaml");
+    CanvasStyle style = node.as<CanvasStyle>();
+    style.loadTextures();
 
     std::cout << canvas.width << std::endl;
     std::cout << canvas.height << std::endl;
@@ -27,6 +31,19 @@ int main(int argc, char** argv )
             std::cout << "Color:   " << stroke.color << std::endl;
         }
     }
+
+    std::cout << "Canvas scale: " << style.canvasScale << std::endl;
+    for (uint i=0; i<style.layers.size(); i++) {
+        LayerStyle layerStyle = style.layers[i];
+        std::cout << "tex_path: " << layerStyle.texPath << std::endl;
+        std::cout << "tex_spacing: " << layerStyle.texSpacing << std::endl;
+        std::cout << layerStyle.texImage << std::endl;
+    }
+}
+
+int main(int argc, char** argv )
+{
+    test();
 
     if ( argc != 2 ) {
         printf("usage: ./render <Image_Path>\n");

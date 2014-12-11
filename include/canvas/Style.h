@@ -2,6 +2,7 @@
 #define __STYLE_H__
 
 #include <yaml-cpp/yaml.h>
+#include <opencv2/opencv.hpp>
 
 #define CANVAS_SCALE_KEY "canvas_scale"
 #define STYLE_LAYERS_KEY "layers"
@@ -41,6 +42,8 @@ public:
     Mat texImage;
     double texSpacing;
     double texJitter;
+
+    void loadTextures();
 };
 
 class CanvasStyle {
@@ -48,6 +51,7 @@ public:
     double canvasScale;
     std::vector<LayerStyle> layers;
 
+    void loadTextures();
 };
 
 namespace YAML {
