@@ -41,18 +41,23 @@ void Processor::doSobel(int kernelsize){
     // borderType: extrapolation method at borders
     Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT);
     //convertScaleAbs(gradX, absgradX);
-    absgradX = abs(gradX);
+    //absgradX = abs(gradX);
     Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
     //convertScaleAbs(gradY, absgradY);
-    absgradY = abs(gradY);
+   // absgradY = abs(gradY);
 
+    
+    // Note that it matters whether you're dealing with bytes (gray) or ints
     std::cout << (absgradX.size == absgradY.size) << std::endl; 
     std::cout << gradX.depth() << std::endl;
     std::cout << gradY.depth() << std::endl;
     std::cout << absgradX.depth() << std::endl;
     std::cout << absgradY.depth() << std::endl;
 
-    magnitude(absgradX, absgradY, grad);
+
+
+//    magnitude(absgradX, absgradY, grad);
+    magnitude(gradX, gradY, grad);
 
     namedWindow("gradWind", CV_WINDOW_AUTOSIZE);
     imshow("gradWind", grad);
