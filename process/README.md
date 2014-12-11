@@ -75,12 +75,12 @@ For each layer, have:
             - Start at anchor cx, cy
             - "Grow" the line in the orientation direction until maxLength is reached or an edge is detected (an edge is considered found if the magnitude of the gradient decreases in the direction of the stroke being grown)
             - More specifically, with (x1, y1) being an endpoint:
-                a. Set (x1, y1) to (cx, cy)
-                b. "bilinearly sample" the Sobel filtered intensity image at (x1, y1) (with Sobel value = magnitude of the gradient) and set lastSample = this value
-                c. set (tempx, tempy) = (x1 + dirx, y1+diry), taking a unit step in the orientation direction
-                d. if (dist(x1, y1), (tempx, tempy)) > length of stroke / 2, stop
-                e. bilinearly sample the Sobel image at (tempx, tempy)... set newSample to this value
-                f. if (newSample < lastSample), detected edge and stope
-                g. set (x1, y1) to (tempx, tempy)
-                h. set lastSample to newSample
-                i. go to step c.
+    1. Set (x1, y1) to (cx, cy)
+    2. "bilinearly sample" the Sobel filtered intensity image at (x1, y1) (with Sobel value = magnitude of the gradient) and set lastSample = this value
+    3. set (tempx, tempy) = (x1 + dirx, y1+diry), taking a unit step in the orientation direction
+    4. if (dist(x1, y1), (tempx, tempy)) > length of stroke / 2, stop
+    5. bilinearly sample the Sobel image at (tempx, tempy)... set newSample to this value
+    6. if (newSample < lastSample), detected edge and stope
+    7. set (x1, y1) to (tempx, tempy)
+    8. set lastSample to newSample
+    9. go to step c.
