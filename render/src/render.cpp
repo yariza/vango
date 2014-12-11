@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
+#include <boost/filesystem.hpp>
 #include "canvas/Canvas.h"
 #include "canvas/Style.h"
 
@@ -11,9 +12,10 @@ void test()
         "{width: 20, height: 40, layers: [[{anchor: [1.4, 2.6], angle: 0.3, length1: 3, length2: 4, width: 1.43, opacity: 0.3, color: [0.3, 0.4, 0.6]}]] }");
     Canvas canvas = node.as<Canvas>();
 
-    node = YAML::LoadFile("assets/styles/test.yaml");
+    std::string yamlPath = "assets/styles/test.yaml";
+    node = YAML::LoadFile(yamlPath);
     CanvasStyle style = node.as<CanvasStyle>();
-    style.loadTextures();
+    style.loadTextures(yamlPath);
 
     std::cout << canvas.width << std::endl;
     std::cout << canvas.height << std::endl;
@@ -37,7 +39,7 @@ void test()
         LayerStyle layerStyle = style.layers[i];
         std::cout << "tex_path: " << layerStyle.texPath << std::endl;
         std::cout << "tex_spacing: " << layerStyle.texSpacing << std::endl;
-        std::cout << layerStyle.texImage << std::endl;
+        // std::cout << layerStyle.texImage << std::endl;
     }
 }
 
