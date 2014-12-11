@@ -81,8 +81,8 @@ void Processor::placeStrokes(){
     // actually... technically... of size image * scale... :(    
     // brush width, wr. etc. all in terms of canvas size... 
 
-    int k = 1500; // try k random points
-    int stopthresh = 20; // if failed to place stopthresh times, stop algorithm 
+    int k = 5000; // try k random points
+    int stopthresh = 100; // if failed to place stopthresh times, stop algorithm 
     double scale = 1;
     double wr = 10; 
     int countstop = 0;
@@ -103,13 +103,13 @@ void Processor::placeStrokes(){
             break;
         }
         std::cout << countstop << std::endl;
-        double r = rand()%maskSize.height;
-        double c = rand()%maskSize.width;                  
+        int r = rand()%maskSize.height;
+        int c = rand()%maskSize.width;                  
        
-        double rs = std::max(0, (int)(r-wr/2.0)); 
-        double re = std::min((int)(r+wr/2.0), maskSize.height);
-        double cs = std::max(0, (int)(c-wr/2.0));
-        double ce = std::min((int)(c+wr/2.0), maskSize.width);
+        int rs = std::max(0, (int)(r-wr/2.0)); 
+        int re = std::min((int)(r+wr/2.0), maskSize.height);
+        int cs = std::max(0, (int)(c-wr/2.0));
+        int ce = std::min((int)(c+wr/2.0), maskSize.width);
 
         //std::cout << "trying " << r << ", " << c << std::endl;
         if (countNonZero(maskimg(Range(rs, re), Range(cs, ce))) >= 1){
@@ -141,6 +141,31 @@ void Processor::placeStrokes(){
     waitKey(0); 
 
     std::cout << "postprocessing... fill in the holes" << std::endl;
+    
+    for(int r = 0; r < maskSize.height; ++r){
+        for(int c = 0; c < maskSize.width; ++c){
+       
+            int rs = std::max(0, (int)(r-wr/2.0)); 
+            int re = std::min((int)(r+wr/2.0), maskSize.height);
+            int cs = std::max(0, (int)(c-wr/2.0));
+            int ce = std::min((int)(c+wr/2.0), maskSize.width);
+
+            //std::cout << "trying " << r << ", " << c << std::endl;
+            if (countNonZero(maskimg(Range(rs, re), Range(cs, ce))) >= 1){
+                //std::cout << "rejected " << std::endl;
+                continue;
+            }
+            std::cout << "setting " << r << ", " << c << std::endl;
+            maskimg.at<uchar>(r,c) = 255; 
+        }
+    }
+
+    namedWindow("pWind", CV_WINDOW_NORMAL);
+    imshow("pWind", maskimg);
+    waitKey(0); 
+
+   
+
 
 
     for (int i = 0; i < imgSize.height; ++i){

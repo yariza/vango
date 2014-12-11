@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     std::cout << "run process on " << imgName << " as determined by " << styleName << "..." << std::endl;
 
     Processor pro(imgName);
-    pro.display();
+    //pro.display();
 
     //pro.doSobel();
 
