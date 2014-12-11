@@ -8,7 +8,8 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 include (Common)
 
 find_package( OpenCV REQUIRED )
-find_package( YamlCPP REQUIRED )
+set(YAMLCPP_STATIC_LIBRARY TRUE)
+find_package( YamlCpp REQUIRED )
 
 # TCLAP library is required
 find_package (TCLAP REQUIRED)
@@ -27,4 +28,4 @@ append_files( Sources "cpp" src/ src/canvas/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_executable ( process ${Headers} ${Templates} ${Sources})
 
-target_link_libraries( render ${OpenCV_LIBS} ${YAMLCPP_LIBRARY})
+target_link_libraries( process ${OpenCV_LIBS} ${YAMLCPP_LIBRARY})
