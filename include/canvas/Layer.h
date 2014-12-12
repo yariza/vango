@@ -2,6 +2,7 @@
 #define __LAYER_H__
 
 #include "Brushstroke.h"
+#include "Style.h"
 
 using namespace cv;
 
@@ -9,6 +10,8 @@ class Layer {
 
 public:
     std::vector<Brushstroke> strokes;
+
+    void draw(Mat& color, Mat& height, LayerStyle& style);
 };
 
 namespace YAML {

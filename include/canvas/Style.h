@@ -43,7 +43,7 @@ public:
     double texSpacing;
     double texJitter;
 
-    void loadTextures(std::string yamlPath);
+    bool loadTextures(std::string yamlPath);
 };
 
 class CanvasStyle {
@@ -51,7 +51,7 @@ public:
     double canvasScale;
     std::vector<LayerStyle> layers;
 
-    void loadTextures(std::string yamlPath);
+    bool loadTextures(std::string yamlPath);
 };
 
 namespace YAML {

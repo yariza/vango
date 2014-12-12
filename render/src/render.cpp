@@ -74,18 +74,23 @@ void loadCanvas()
     YAML::Node styleNode = YAML::LoadFile(styleFile);
     CanvasStyle style = styleNode.as<CanvasStyle>();
 
+    if (!style.loadTextures(styleFile))
+        exit(1);
+
     renderer.load(canvas, style);
 }
 
 int main(int argc, char** argv )
 {
-    // test();
-
     parseCommandLine(argc, argv);
 
     loadCanvas();
 
     debugLog(renderer.canvas, renderer.style);
+
+    renderer.initialize();
+    renderer.draw();
+    renderer.display(true, true);
 
     // if ( argc != 2 ) {
     //     printf("usage: ./render <Image_Path>\n");

@@ -15,6 +15,8 @@ public:
     int width;
     int height;
     std::vector<Layer> layers;
+
+    void draw(Mat& color, Mat& height, CanvasStyle& style);
 };
 
 namespace YAML {

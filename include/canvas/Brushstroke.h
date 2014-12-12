@@ -17,8 +17,6 @@ using namespace cv;
 class Brushstroke {
 
 public:
-    Brushstroke();
-    Brushstroke(Mat& image, double spacing, double jitter);
     // anchor point
     Point2d anchor;
 
@@ -40,10 +38,9 @@ public:
     // color (R,G,B). Types are in double (0-1).
     Vec3d color;
 
-    // texture image
-    Mat* texImage;
-    double texSpacing;
-    double texJitter;
+    void draw(Mat& colorMap, Mat& heightMap,
+              Mat& texture, Mat& mask,
+              double layerOpacity, double spacing, double jitter);
 
 private:
 };

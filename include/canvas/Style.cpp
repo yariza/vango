@@ -3,7 +3,7 @@
 
 using namespace cv;
 
-void LayerStyle::loadTextures(std::string yamlPath)
+bool LayerStyle::loadTextures(std::string yamlPath)
 {
     namespace fs = boost::filesystem;
     fs::path yamlDir = (fs::path(yamlPath)).parent_path();
@@ -14,13 +14,22 @@ void LayerStyle::loadTextures(std::string yamlPath)
     texImage = imread(texAbsPath.native(), CV_LOAD_IMAGE_COLOR);
     maskImage = imread(maskAbsPath.native(), CV_LOAD_IMAGE_COLOR);
 
-    assert(texImage.data != NULL);
-    assert(maskImage.data != NULL);
+    if (texImage.data == NULL) {
+        std::cerr << "error: unable to load texture " << texAbsPath.native() << std::endl;
+        return false;
+    }
+    if (maskImage.data == NULL) {
+        std::cerr << "error: unable to load texture " << maskAbsPath.native() << std::endl;
+        return false;
+    }
+    return true;
 }
 
-void CanvasStyle::loadTextures(std::string yamlPath)
+bool CanvasStyle::loadTextures(std::string yamlPath)
 {
     for (uint i=0; i<layers.size(); i++) {
-        layers[i].loadTextures(yamlPath);
+        if (!layers[i].loadTextures(yamlPath))
+            return false;
     }
+    return true;
 }

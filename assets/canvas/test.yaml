@@ -1,0 +1,12 @@
+width: 500
+height: 500
+layers:
+    -
+        -
+            anchor: [100, 200]
+            angle: 0.3
+            length1: 50
+            length2: 60
+            width: 10.0
+            opacity: 0.6
+            color: [1.0, 0.0, 0.0]
