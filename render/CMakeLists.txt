@@ -8,7 +8,8 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 include (Common)
 
 find_package( OpenCV REQUIRED )
-find_package( YamlCPP REQUIRED )
+set(YAMLCPP_STATIC_LIBRARY TRUE)
+find_package( YamlCpp REQUIRED )
 
 # TCLAP library is required
 find_package (TCLAP REQUIRED)
