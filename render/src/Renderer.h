@@ -9,6 +9,7 @@ public:
     void display(bool newWindow, bool wait);
     void initialize();
     void draw();
+    void writeToFile(std::string path);
 
     CanvasStyle style;
     Canvas canvas;

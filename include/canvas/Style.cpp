@@ -25,10 +25,6 @@ bool LayerStyle::loadTextures(std::string yamlPath)
         texImage = one - texImage;
     }
 
-    // namedWindow("tiled", CV_WINDOW_AUTOSIZE);
-    // imshow("tiled", texImage);
-    // waitKey(0);
-
     Mat maskImageSource = imread(maskAbsPath.native(), CV_LOAD_IMAGE_UNCHANGED);
     maskImage.create(maskImageSource.rows, maskImageSource.cols, maskImageSource.type());
 

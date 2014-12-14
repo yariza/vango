@@ -8,6 +8,9 @@ using namespace TCLAP;
 
 std::string canvasFile;
 std::string styleFile;
+std::string outputFile;
+bool autoOutput;
+bool displayEnabled;
 
 Renderer renderer;
 
@@ -53,10 +56,22 @@ void parseCommandLine(int argc, char** argv)
         ValueArg<std::string> styleFileName("s", "style", "style file defining stylistic parameters", true, "style.yaml", "string");
         cmd.add(styleFileName);
 
+        ValueArg<std::string> outputFileName("o", "output", "output file of the render", false, "", "string");
+        cmd.add(outputFileName);
+
+        SwitchArg autoOutputSwitch("O", "input-name", "write file named like the input file");
+        cmd.add(autoOutputSwitch);
+
+        ValueArg<bool> displayArg("d", "display", "run with display enabled if 1, without if 0", false, true, "boolean");
+        cmd.add(displayArg);
+
         cmd.parse(argc, argv);
 
         canvasFile = canvasFileName.getValue();
         styleFile = styleFileName.getValue();
+        outputFile = outputFileName.getValue();
+        autoOutput = autoOutputSwitch.getValue();
+        displayEnabled = displayArg.getValue();
 
         // std::cout << "run process on " << canvasFile << " as determined by " << styleFile << "..." << std::endl;
     }
@@ -84,30 +99,33 @@ int main(int argc, char** argv )
 {
     parseCommandLine(argc, argv);
 
+    std::string writeFile = outputFile;
+
+    namespace fs = boost::filesystem;
+    if (autoOutput) {
+        fs::path writePath = fs::current_path();
+        fs::path canvasPath = fs::path(canvasFile);
+        writePath /= canvasPath.filename();
+        writePath.replace_extension(fs::path("png"));
+
+        writeFile = writePath.native();
+
+        std::cout << writeFile << std::endl;
+    }
+
     loadCanvas();
 
-    debugLog(renderer.canvas, renderer.style);
+    // debugLog(renderer.canvas, renderer.style);
 
     renderer.initialize();
     renderer.draw();
-    renderer.display(true, true);
 
-    // if ( argc != 2 ) {
-    //     printf("usage: ./render <Image_Path>\n");
-    //     return -1;
-    // }
+    if (displayEnabled) {
+        renderer.display(true, true);
+    }
 
-    // Mat image;
-    // image = imread( argv[1], 1 );
-
-    // if ( !image.data ) {
-    //     printf("No image data \n");
-    //     return -1;
-    // }
-    // namedWindow("render output", CV_WINDOW_AUTOSIZE );
-    // imshow("render output", image);
-
-    // waitKey(0);
-
-    // return 0;
+    if (writeFile != "") {
+        renderer.writeToFile(writeFile);
+        std::cout << "Wrote output to " << writeFile << std::endl;
+    }
 }

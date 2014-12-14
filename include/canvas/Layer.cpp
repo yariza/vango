@@ -15,6 +15,9 @@ void Layer::draw(Mat& colorMap, Mat& heightMap, LayerStyle& style)
     tileTexture(style.texImage, fg_h);
 
     for (uint i=0; i<strokes.size(); i++) {
+
+        std::cout << "\r  [" << (i+1) << " / " << strokes.size() << "] strokes...   ";
+
         Brushstroke& stroke = strokes[i];
 
         fg_c.setTo(Vec3d(stroke.color[2], stroke.color[1], stroke.color[0]));
@@ -26,9 +29,7 @@ void Layer::draw(Mat& colorMap, Mat& heightMap, LayerStyle& style)
 
         blend(colorMap, heightMap, fg_c, fg_a, fg_h, layerOpacity*stroke.opacity);
     }
-
-    namedWindow("alpha", CV_WINDOW_AUTOSIZE);
-    imshow("alpha", fg_a);
+    std::cout << "done." << std::endl;
 }
 
 void Layer::blend(Mat& colorMap, Mat& heightMap,

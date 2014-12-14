@@ -37,7 +37,6 @@ void Brushstroke::renderTexture(Mat& alphaMap, Mat& mask, RotatedRect& maskRect)
     // transformations, etc
 
     Rect2d boundingRect = maskRect.boundingRect();
-    std::cout << boundingRect << std::endl;
 
     int offsetX = (boundingRect.width - mask.cols)/2;
     int offsetY = (boundingRect.height - mask.rows)/2;

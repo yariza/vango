@@ -34,3 +34,11 @@ void Renderer::draw()
 {
     canvas.draw(color, height, style);
 }
+
+void Renderer::writeToFile(std::string path)
+{
+    color *= 255.;
+    Mat outImage = Mat::zeros(canvas.height, canvas.width, CV_8UC3);
+    color.convertTo(outImage, CV_8UC3);
+    imwrite(path, outImage);
+}
