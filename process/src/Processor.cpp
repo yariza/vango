@@ -2,19 +2,105 @@
 
 using namespace cv;
 
-Processor::Processor(std::string imgName){
-    image = imread(imgName, CV_LOAD_IMAGE_COLOR);
+void Processor::initialize(std::string imgFile, std::string styleFile, bool verby){
+    verbose = verby;
+    
+    // load image
+    if(verbose){
+        std::cout << std::endl << "Reading image:  " << imgFile << std::endl;
+    }
 
+    image = imread(imgFile, CV_LOAD_IMAGE_COLOR);    
     if(!image.data){
         std::cout << "No image data :(" << std::endl;
         return;
     }
+    Size imgSize = image.size();
+ 
+    // load style
+    if(verbose){
+        std::cout << "  Image size: " << imgSize << std::endl << std::endl;
+        std::cout << "With style: " << styleFile << std::endl;
+    }
+    YAML::Node styleNode = YAML::LoadFile(styleFile);
+    canvStyle = styleNode.as<CanvasStyle>();
+    
+    canvas.width = imgSize.width * canvStyle.canvasScale;
+    canvas.height = imgSize.height * canvStyle.canvasScale;
+
+    for(int i = 0; i < canvStyle.layers.size(); ++i){
+        Layer l;
+        canvas.layers.push_back(l);
+    }
+
+    if(verbose){
+        std::cout << "Reading canvas -done- " << std::endl;
+        std::cout << "  canvasScale: " << canvStyle.canvasScale << std::endl;
+        std::cout << "  canvasSize: " << canvas.width << " x " << canvas.height << std::endl;
+        std::cout << "  num layers: " << canvas.layers.size() << std::endl;     
+        std::cout << std::endl << "End initialization............" << std::endl << std::endl;
+    }
 }
 
-Processor::~Processor()
-{}
+void Processor::initialize(std::string imgFile, std::string styleFile){
+    initialize(imgFile, styleFile, false);
+}
 
-void Processor::blurImage(double kernelwidth, double kernelheight){
+void Processor::processImage() {
+    
+    for(int i = 0; i < canvas.layers.size(); ++i){
+        buildStrokes(canvas.layers[i], canvStyle.layers[i]);
+        angleStrokes(canvas.layers[i], canvStyle.layers[i]);
+        clipStrokes(canvas.layers[i], canvStyle.layers[i]);
+        colorStrokes(canvas.layers[i], canvStyle.layers[i]);
+
+    }
+}
+
+void Processor::saveToFile(std::string outFile){
+    YAML::Emitter yout;
+    YAML::convert<Canvas> yconv;
+    YAML::Node canvasNode = yconv.encode(canvas);
+    yout << canvasNode;
+    
+    std::ofstream fout; 
+    fout.open(outFile.c_str());
+    fout << yout.c_str();
+    fout.close();
+}
+
+
+void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
+
+
+}
+
+void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle){
+
+
+}
+
+void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle){
+
+
+}
+
+void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle){
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+void Processor::ignorethisblurImage(double kernelwidth, double kernelheight){
     Mat blurimg = image.clone();
     //for (int i = 1; i < max_kernel_length; i += 2){
         // Size(w,h): size of the kernel to be used, with w, h odd and positive
@@ -25,7 +111,7 @@ void Processor::blurImage(double kernelwidth, double kernelheight){
 
 }
 
-void Processor::doSobel(int kernelsize){
+void Processor::ignorethisdoSobel(int kernelsize){
     Mat grayimg;
     cvtColor(image, grayimg, CV_RGB2GRAY);
     Mat gradX, gradY;
@@ -67,7 +153,7 @@ void Processor::doSobel(int kernelsize){
 }
 
 
-void Processor::display(std::string windowName){
+void Processor::ignorethisdisplay(std::string windowName){
     namedWindow(windowName, WINDOW_NORMAL);
     imshow(windowName, image);
 
@@ -76,7 +162,7 @@ void Processor::display(std::string windowName){
 }
 
 
-void Processor::placeStrokes(){
+void Processor::ignorethisplaceStrokes(){
     // create binary matrix of size image
     // actually... technically... of size image * scale... :(    
     // brush width, wr. etc. all in terms of canvas size... 

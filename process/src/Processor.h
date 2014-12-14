@@ -12,21 +12,35 @@
 
 class Processor {
 public:
-    Processor(std::string imgFile);
-
-    virtual ~Processor();
-
-    virtual void blurImage(double kernelwidth = 11, double kernelheight = 11);
-
-    virtual void doSobel(int kernelsize = 3);
     
-    virtual void display(std::string windowName="window");
+    void initialize(std::string imgFile, std::string styleFile); 
+    void initialize(std::string imgFile, std::string styleFile, bool verby);
+    void processImage();
+    void saveToFile(std::string outFile);    
 
-    virtual void placeStrokes();
+
+
+
+    void ignorethisblurImage(double kernelwidth = 11, double kernelheight = 11);
+
+    void ignorethisdoSobel(int kernelsize = 3);
+    
+    void ignorethisdisplay(std::string windowName="window");
+
+    void ignorethisplaceStrokes();
+
+    bool verbose;     
 
 private:
-    cv::Mat image;
 
+    void buildStrokes(Layer& layer, LayerStyle& lstyle);
+    void angleStrokes(Layer& layer, LayerStyle& lstyle);
+    void clipStrokes(Layer& layer, LayerStyle& lstyle);
+    void colorStrokes(Layer& layer, LayerStyle& lstyle);
+
+    cv::Mat image;
+    Canvas canvas;
+    CanvasStyle canvStyle; 
 };
 
 

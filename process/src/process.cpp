@@ -1,46 +1,45 @@
-#include <string>
-#include <iostream>
-#include <algorithm>
+#include <stdio.h>
 #include <tclap/CmdLine.h>
-#include "canvas/Brushstroke.h"
 #include "Processor.h"
 
 using namespace TCLAP;
-using namespace std;
 
-int main(int argc, char** argv)
-{
-  // Wrap everything in a try block.  Do this every time,
-  // because exceptions will be thrown for problems.
-  try {
+std::string imgFile;
+std::string styleFile;
+std::string outFile;
 
-    // Define the command line object.
-    CmdLine cmd("Vango Process", ' ', "0.001");
+Processor processor; 
 
-    ValueArg<string> styleFileName("s", "style", "style file defining stylistic parameters", true, "style.yaml", "string");
-    cmd.add(styleFileName);
+void parseCommandLine(int argc, char** argv){
+    try {
+        CmdLine cmd("Vango Process", ' ', "0.001");
 
-    ValueArg<string> imgFileName("i", "image", "image file to process", true, "image.png", "string");
-    cmd.add(imgFileName);
+        ValueArg<string> outFileName("o", "output", "output yaml file to write the canvas information to", "true", "out.yaml", "string");
+        cmd.add(outFileName);
 
-    cmd.parse(argc, argv);
+        ValueArg<string> styleFileName("s", "style", "style file defining stylistic parameters", true, "style.yaml", "string");
+        cmd.add(styleFileName);
 
-    string imgName = imgFileName.getValue();
-    string styleName = styleFileName.getValue();
+        ValueArg<string> imgFileName("i", "image", "image file to process", true, "image.png", "string");
+        cmd.add(imgFileName);
 
-    std::cout << "run process on " << imgName << " as determined by " << styleName << "..." << std::endl;
+        cmd.parse(argc, argv);
 
-    Processor pro(imgName);
-    //pro.display();
+        imgFile = imgFileName.getValue();
+        styleFile = styleFileName.getValue();
+        outFile = outFileName.getValue();
+    } 
+    catch (ArgException &e) { 
+        std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
+    }
+}   
 
-    //pro.doSobel();
+int main(int argc, char** argv) {
+    parseCommandLine(argc, argv);
+    
+    processor.initialize(imgFile, styleFile, true);
 
-    //pro.blurImage();
-    //pro.display();
-    //pro.doSobel();
+    processor.processImage();
 
-    pro.placeStrokes();    
-
-} catch (ArgException &e)  // catch any exceptions
-    { cerr << "error: " << e.error() << " for arg " << e.argId() << endl; }
+    processor.saveToFile(outFile);    
 }
