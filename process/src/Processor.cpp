@@ -28,10 +28,31 @@ void Processor::initialize(std::string imgFile, std::string styleFile, bool verb
     canvas.width = imgSize.width * canvStyle.canvasScale;
     canvas.height = imgSize.height * canvStyle.canvasScale;
 
+    // blur images
     for(int i = 0; i < canvStyle.layers.size(); ++i){
         Layer l;
         canvas.layers.push_back(l);
         blurimages.push_back(image.clone());
+    }
+
+    // get sobel gradients
+    for(int i = 0; i < canvStyle.layers.size(); ++i){
+        Mat grayimg;
+        cvtColor(blurimages[i], grayimg, CV_RGB2GRAY);    
+        Mat gradX;
+        Mat gradY;
+        Mat grad;
+
+        int kernelsize = 3;
+
+        Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
+        Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
+        magnitude(gradX, gradY, grad);
+    
+        gradimages.push_back(grad);
+        gradXimages.push_back(gradX);
+        gradYimages.push_back(gradY);
+
     }
     
     srand(time(NULL));
@@ -75,10 +96,10 @@ void Processor::processImage() {
         if(i != canvas.layers.size()-1) // absolutely do not blur the top image jeez 
             GaussianBlur(image, blurimages[i], Size(kernelSize, kernelSize), 0, 0, BORDER_DEFAULT);
  
-        buildStrokes(layer, lstyle, blurimages[i]);
-        angleStrokes(layer, lstyle, blurimages[i]);
-        clipStrokes(layer, lstyle, blurimages[i]);
-        colorStrokes(layer, lstyle, blurimages[i]);
+        buildStrokes(layer, lstyle, i);
+        angleStrokes(layer, lstyle, i);
+        clipStrokes(layer, lstyle, i);
+        colorStrokes(layer, lstyle, i);
 
         if(verbose)
             std::cout << std::endl;
@@ -106,7 +127,8 @@ void Processor::saveToFile(std::string outFile){
 
 
 // Get anchors, set width + opacity
-void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
+void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
+    cv::Mat& blurimg = blurimages[lid];
     int k = .25 * canvas.width * canvas.height; // why not, obviously a factor of image size
     int stopthresh = k * .001;
     int countstop = 0;    
@@ -125,7 +147,7 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg)
     Size maskSize = maskimg.size();
     // if regenMaskWidth == 0, this is the bottom layer and should subsequently be fully covered
     if (lstyle.regenMaskWidth > .00000001){
-        createRegenMask(maskimg, blurimg, lstyle.regenMaskWidth);        
+        createRegenMask(maskimg, lid, lstyle.regenMaskWidth);        
     }
 
     for(int i = 0; i < k; ++i){
@@ -216,25 +238,29 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg)
     }
 }
 
-void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
+void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, int lid){
 
 
 }
 
-void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
+void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
+    cv::Mat& blurimg = blurimages[lid];
     if(verbose){
         std::cout << "Clipping strokes..................." << std::endl;
     }
    
     // edges detected based on Sobel-filtered gradients of the intensity image
-    Mat grayimg;
-    cvtColor(blurimg, grayimg, CV_RGB2GRAY);    
-    Mat gradX, gradY, grad;
-    int kernelsize = 3;
+    //Mat grayimg;
+    //cvtColor(blurimg, grayimg, CV_RGB2GRAY);    
+    //Mat gradX, gradY, grad;
+    //int kernelsize = 3;
 
-    Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
-    Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
-    magnitude(gradX, gradY, grad);
+    //Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
+    //Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
+    //magnitude(gradX, gradY, grad);
+       
+    Mat& grad = gradimages[lid];
+
     double maxLength = lstyle.maxBrushLength/2.0;     
 
     if(verbose){
@@ -299,8 +325,9 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
             oldSample = newSample;
         }   
 
-        stroke.length1 = dist(x1, stroke.anchor);
-        stroke.length2 = dist(x2, stroke.anchor);
+        stroke.length1 = max(.5, dist(x1, stroke.anchor));
+        stroke.length2 = max(.5, dist(x2, stroke.anchor));
+        
         
         if(verbose){
             std::cout << "for stroke at " << stroke.anchor << std::endl;
@@ -316,7 +343,8 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
     }
 }
 
-void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
+void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, int lid){
+    cv::Mat& blurimg = blurimages[lid];
     // for now, just use the color at the anchor point
     
     if(verbose){
@@ -354,26 +382,26 @@ void Processor::makeDummyStroke(Brushstroke& stroke, Point2d ankh, double avgWb,
 
 }
 
-void Processor::createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwidth){
+void Processor::createRegenMask(cv::Mat& mask, int lid, double rmaskwidth){
     Mat threshimg; 
-    Mat grayimg;
-    cvtColor(blurimg, grayimg, CV_RGB2GRAY);    
-    Mat gradX, gradY, grad;
-    int kernelsize = 3;
-    if(verbose){
-        std::cout << "creating RegenMask" << std::endl;
-        std::cout << "  kernelsize: " << kernelsize << std::endl;
-    }
+    //Mat grayimg;
+    //cvtColor(blurimg, grayimg, CV_RGB2GRAY);    
+    //Mat gradX, gradY, grad;
+    //int kernelsize = 3;
+    //if(verbose){
+    //    std::cout << "creating RegenMask" << std::endl;
+    //    std::cout << "  kernelsize: " << kernelsize << std::endl;
+   // }
 
-    Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
-    Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
-    magnitude(gradX, gradY, grad);
+    //Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
+    //Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
+    //magnitude(gradX, gradY, grad);
+
+    Mat& grad = gradimages[lid];
     
     double threshval = 10.0; 
 
     if(verbose){
-        displayImage(grad, "sobel image");
-    
         std::cout << "  thresholding..." << std::endl;
         std::cout << "  threshvalue: " << threshval << std::endl;
     }
@@ -421,6 +449,7 @@ void Processor::displayImage(cv::Mat& img, std::string windowName){
     namedWindow(windowName, WINDOW_NORMAL);
     imshow(windowName, img);
     waitKey(0);
+    destroyWindow(windowName);
 }
 
 

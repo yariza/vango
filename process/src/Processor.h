@@ -34,18 +34,21 @@ public:
 
 private:
 
-    void buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
-    void angleStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
-    void clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
-    void colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
+    void buildStrokes(Layer& layer, LayerStyle& lstyle, int lid);
+    void angleStrokes(Layer& layer, LayerStyle& lstyle, int lid);
+    void clipStrokes(Layer& layer, LayerStyle& lstyle, int lid);
+    void colorStrokes(Layer& layer, LayerStyle& lstyle, int lid);
     
     void makeDummyStroke(Brushstroke& stroke, cv::Point2d ankh, double avgWb, double dWb, double opac);
-    void createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwidth);
+    void createRegenMask(cv::Mat& mask, int lid, double rmaskwidth);
     double dist(cv::Point2d& x1, cv::Point2d& x2);
     void displayImage(cv::Mat& img, std::string windowName);
 
     cv::Mat image;
     std::vector<cv::Mat> blurimages; 
+    std::vector<cv::Mat> gradXimages;
+    std::vector<cv::Mat> gradYimages;
+    std::vector<cv::Mat> gradimages;
     Canvas canvas;
     CanvasStyle canvStyle; 
 };
