@@ -12,7 +12,7 @@ layers:
     tex_spacing: 1.0
     tex_jitter: 0.0
   - regen_width: 8.0
-    avg_brush_width: 6.0
+    avg_brush_width: 3.0
     var_brush_width: 1.0
     opacity: 0.7
     regen_mask_width: 10.0

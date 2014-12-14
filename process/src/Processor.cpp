@@ -73,10 +73,10 @@ void Processor::processImage() {
         if(i != canvas.layers.size()-1) // absolutely do not blur the top image jeez 
             GaussianBlur(image, blurimages[i], Size(kernelSize, kernelSize), 0, 0, BORDER_DEFAULT);
  
-        buildStrokes(layer, lstyle);
+        buildStrokes(layer, lstyle, blurimages[i]);
         angleStrokes(layer, lstyle);
         clipStrokes(layer, lstyle);
-        colorStrokes(layer, lstyle);
+        colorStrokes(layer, lstyle, blurimages[i]);
 
         if(verbose)
             std::cout << std::endl;
@@ -84,6 +84,9 @@ void Processor::processImage() {
 }
 
 void Processor::saveToFile(std::string outFile){
+    if(verbose){
+        std::cout << "writing to file... " << outFile << std::endl;
+    }
     YAML::Emitter yout;
     YAML::convert<Canvas> yconv;
     YAML::Node canvasNode = yconv.encode(canvas);
@@ -93,11 +96,15 @@ void Processor::saveToFile(std::string outFile){
     fout.open(outFile.c_str());
     fout << yout.c_str();
     fout.close();
+    if(verbose){
+
+        std::cout << "finished writing" << std::endl;
+    }
 }
 
 
 // Get anchors, set width + opacity
-void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
+void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
     int k = .25 * canvas.width * canvas.height; // why not, obviously a factor of image size
     int stopthresh = k * .001;
     int countstop = 0;    
@@ -115,6 +122,10 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
     Mat maskimg(canvas.height, canvas.width, CV_8UC1, s);     
     Size maskSize = maskimg.size();
     // if regenMaskWidth == 0, this is the bottom layer and should subsequently be fully covered
+    if (lstyle.regenMaskWidth > .00000001){
+        createRegenMask(maskimg, blurimg, lstyle.regenMaskWidth);
+
+    }
 
     for(int i = 0; i < k; ++i){
         if(countstop > stopthresh){
@@ -181,8 +192,7 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
                 continue;
             }
             // valid point
-
-    
+ 
             maskimg.at<uchar>(r,c) = 255; 
 
             Brushstroke b;
@@ -215,16 +225,27 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle){
 
 }
 
-void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle){
+void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage){
     // for now, just use the color at the anchor point
     
+    if(verbose){
+        std::cout << "Started coloring strokes" << std::endl;
+    }
+
     Vec3b col; 
     double scale = canvStyle.canvasScale;
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
-        col = image.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y/scale));
+        // use blurred image when getting color 
+        col = bimage.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y / scale));
         stroke.color = BGR_TO_RGBDOUBLE(col);
 
+        if(verbose){
+            std::cout << " Set color at stroke " << stroke.anchor << " to " << stroke.color << std::endl;
+        }
+    }
+    if(verbose){
+        std::cout << "Finished coloring strokes" << std::endl;
     }
 }
 
@@ -236,20 +257,60 @@ void Processor::makeDummyStroke(Brushstroke& stroke, Point2d ankh, double avgWb,
     // dummy values for other parameters
     stroke.angle = .78;
     stroke.strength = 0;
-    stroke.length1 = 4;
-    stroke.length2 = 10;
+    stroke.length1 = 2;
+    stroke.length2 = 2;
     stroke.color = Vec3d(.5, .5, .5);
 
 }
 
+void Processor::createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwidth){
+    Mat grayimg;
+    Mat threshimg; 
+    cvtColor(blurimg, grayimg, CV_RGB2GRAY); // intensity image
+    Mat gradX, gradY;
+    Mat grad; 
+    double kernelsize = 3;
 
-void Processor::displayImage(cv::Mat img, std::string windowName){
+    if(verbose){
+        std::cout << "creating RegenMask" << std::endl;
+        std::cout << "  kernelsize: " << kernelsize << std::endl;
+    }
+
+    std::cout << "scale : " << canvStyle.canvasScale << std::endl;
+    Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
+    Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
+    magnitude(gradX, gradY, grad);
+    
+    double threshval = 10.0; 
+
+    if(verbose){
+        std::cout << "  thresholding..." << std::endl;
+        std::cout << "  threshvalue: " << threshval << std::endl;
+    }
+    
+    threshold(grad, threshimg, threshval, 255, 1);
+    threshimg.convertTo(threshimg, CV_8U, 1);
+    if(verbose){
+        displayImage(threshimg, "mask before hole-filling");
+    }
+    
+    Mat element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
+    morphologyEx(threshimg, threshimg,  MORPH_OPEN, element);
+    
+    if(verbose){
+        displayImage(threshimg, "mask after hole-filling");
+    }
+
+    resize(threshimg, mask, mask.size(), 0, 0, INTER_LINEAR);
+    //dilate(mask, mask, Mat(), Point(-1, -1), (int)rmaskwidth);
+    
+} 
+
+void Processor::displayImage(cv::Mat& img, std::string windowName){
     namedWindow(windowName, WINDOW_NORMAL);
     imshow(windowName, img);
     waitKey(0);
 }
-
-
 
 
 
@@ -510,8 +571,7 @@ void Processor::ignorethisplaceStrokes(){
 
     //out << canvas;
     //YAML::Node canvasNode; 
-    
-    
+        
 
 }
 

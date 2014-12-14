@@ -34,13 +34,14 @@ public:
 
 private:
 
-    void buildStrokes(Layer& layer, LayerStyle& lstyle);
+    void buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
     void angleStrokes(Layer& layer, LayerStyle& lstyle);
     void clipStrokes(Layer& layer, LayerStyle& lstyle);
-    void colorStrokes(Layer& layer, LayerStyle& lstyle);
+    void colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
     
     void makeDummyStroke(Brushstroke& stroke, cv::Point2d ankh, double avgWb, double dWb, double opac);
-    void displayImage(cv::Mat img, std::string windowName);
+    void createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwidth);
+    void displayImage(cv::Mat& img, std::string windowName);
 
     cv::Mat image;
     std::vector<cv::Mat> blurimages; 

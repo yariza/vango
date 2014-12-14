@@ -7,12 +7,15 @@ using namespace TCLAP;
 std::string imgFile;
 std::string styleFile;
 std::string outFile;
+bool actuallyWrite; 
 
 Processor processor; 
 
 void parseCommandLine(int argc, char** argv){
     try {
         CmdLine cmd("Vango Process", ' ', "0.001");
+
+        SwitchArg outSwitch("d", "don't_write", "don't actually write to file", cmd, false);
 
         ValueArg<string> outFileName("o", "output", "output yaml file to write the canvas information to", "true", "out.yaml", "string");
         cmd.add(outFileName);
@@ -28,6 +31,7 @@ void parseCommandLine(int argc, char** argv){
         imgFile = imgFileName.getValue();
         styleFile = styleFileName.getValue();
         outFile = outFileName.getValue();
+        actuallyWrite = !outSwitch.getValue();
     } 
     catch (ArgException &e) { 
         std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
@@ -40,6 +44,7 @@ int main(int argc, char** argv) {
     processor.initialize(imgFile, styleFile, true);
 
     processor.processImage();
-
-    processor.saveToFile(outFile);    
+    
+    if(actuallyWrite)
+        processor.saveToFile(outFile);    
 }
