@@ -32,6 +32,20 @@ void Brushstroke::draw(Mat& alphaMap, Mat& mask,
     }
 }
 
+void Brushstroke::simpleDraw(Mat& colorMap, Mat& alphaMap)
+{
+    Point2d normal = Point2d(cos(angle), sin(angle));
+
+    Point2d point1 = normal * length1;
+    Point2d point2 = normal * -length2;
+
+    point1 += anchor;
+    point2 += anchor;
+
+    line(colorMap, point1, point2, RGB_TO_SCALAR(color), (int)width, CV_AA);
+    line(alphaMap, point1, point2, CV_RGB(1,1,1), (int)width, CV_AA);
+}
+
 void Brushstroke::renderTexture(Mat& alphaMap, Mat& mask, RotatedRect& maskRect)
 {
     // transformations, etc

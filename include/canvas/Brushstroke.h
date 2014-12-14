@@ -41,6 +41,7 @@ public:
 
     void draw(Mat& alphaMap, Mat& mask,
               double spacing, double jitter);
+    void simpleDraw(Mat& colorMap, Mat& alphaMap);
 
 private:
     void renderTexture(Mat& alphaMap, Mat& mask, RotatedRect& maskRect);

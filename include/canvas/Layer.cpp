@@ -1,6 +1,6 @@
 #include "Layer.h"
 
-void Layer::draw(Mat& colorMap, Mat& heightMap, LayerStyle& style)
+void Layer::draw(Mat& colorMap, Mat& heightMap, LayerStyle& style, bool simple)
 {
     Mat& mask = style.maskImage;
     double spacing = style.texSpacing;
@@ -20,14 +20,18 @@ void Layer::draw(Mat& colorMap, Mat& heightMap, LayerStyle& style)
 
         Brushstroke& stroke = strokes[i];
 
-        fg_c.setTo(Vec3d(stroke.color[2], stroke.color[1], stroke.color[0]));
-        fg_a.setTo(0); // clear alpha map
+        if (simple) {
+            stroke.simpleDraw(colorMap, heightMap);
+        }
+        else {
+            fg_c.setTo(Vec3d(stroke.color[2], stroke.color[1], stroke.color[0]));
+            fg_a.setTo(0); // clear alpha map
 
-        stroke.draw(fg_a, mask, spacing, jitter);
+            stroke.draw(fg_a, mask, spacing, jitter);
 
-        fg_a = fg_a.mul(fg_h);
-
-        blend(colorMap, heightMap, fg_c, fg_a, fg_h, layerOpacity*stroke.opacity);
+            fg_a = fg_a.mul(fg_h);
+            blend(colorMap, heightMap, fg_c, fg_a, fg_h, layerOpacity*stroke.opacity);
+        }
     }
     std::cout << "done." << std::endl;
 }

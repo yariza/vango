@@ -11,6 +11,7 @@ std::string styleFile;
 std::string outputFile;
 bool autoOutput;
 bool displayEnabled;
+bool simpleMode;
 
 Renderer renderer;
 
@@ -65,6 +66,9 @@ void parseCommandLine(int argc, char** argv)
         ValueArg<bool> displayArg("d", "display", "run with display enabled if 1, without if 0", false, true, "boolean");
         cmd.add(displayArg);
 
+        SwitchArg simpleArg("p", "simple-paint", "enable simple mode (runs faster)");
+        cmd.add(simpleArg);
+
         cmd.parse(argc, argv);
 
         canvasFile = canvasFileName.getValue();
@@ -72,6 +76,7 @@ void parseCommandLine(int argc, char** argv)
         outputFile = outputFileName.getValue();
         autoOutput = autoOutputSwitch.getValue();
         displayEnabled = displayArg.getValue();
+        simpleMode = simpleArg.getValue();
 
         // std::cout << "run process on " << canvasFile << " as determined by " << styleFile << "..." << std::endl;
     }
@@ -118,7 +123,7 @@ int main(int argc, char** argv )
     // debugLog(renderer.canvas, renderer.style);
 
     renderer.initialize();
-    renderer.draw();
+    renderer.draw(simpleMode);
 
     if (displayEnabled) {
         renderer.display(true, true);

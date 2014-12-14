@@ -8,7 +8,7 @@ public:
     void load(Canvas _canvas, CanvasStyle _style);
     void display(bool newWindow, bool wait);
     void initialize();
-    void draw();
+    void draw(bool simpleMode);
     void writeToFile(std::string path);
 
     CanvasStyle style;

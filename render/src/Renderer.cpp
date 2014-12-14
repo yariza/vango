@@ -30,9 +30,9 @@ void Renderer::initialize()
     color.setTo(Vec3d(1,1,1));
 }
 
-void Renderer::draw()
+void Renderer::draw(bool simpleMode)
 {
-    canvas.draw(color, height, style);
+    canvas.draw(color, height, style, simpleMode);
 }
 
 void Renderer::writeToFile(std::string path)
