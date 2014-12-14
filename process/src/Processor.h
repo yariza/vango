@@ -38,7 +38,10 @@ private:
     void clipStrokes(Layer& layer, LayerStyle& lstyle);
     void colorStrokes(Layer& layer, LayerStyle& lstyle);
 
+    void displayImage(cv::Mat img, std::string windowName);
+
     cv::Mat image;
+    std::vector<cv::Mat> blurimages; 
     Canvas canvas;
     CanvasStyle canvStyle; 
 };

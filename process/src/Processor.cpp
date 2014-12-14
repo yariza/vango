@@ -31,6 +31,7 @@ void Processor::initialize(std::string imgFile, std::string styleFile, bool verb
     for(int i = 0; i < canvStyle.layers.size(); ++i){
         Layer l;
         canvas.layers.push_back(l);
+        blurimages.push_back(image.clone());
     }
 
     if(verbose){
@@ -46,14 +47,39 @@ void Processor::initialize(std::string imgFile, std::string styleFile){
     initialize(imgFile, styleFile, false);
 }
 
-void Processor::processImage() {
-    
+void Processor::processImage() {    
     for(int i = 0; i < canvas.layers.size(); ++i){
-        buildStrokes(canvas.layers[i], canvStyle.layers[i]);
-        angleStrokes(canvas.layers[i], canvStyle.layers[i]);
-        clipStrokes(canvas.layers[i], canvStyle.layers[i]);
-        colorStrokes(canvas.layers[i], canvStyle.layers[i]);
+        LayerStyle& lstyle = canvStyle.layers[i];
+        Layer& layer = canvas.layers[i];
+        if(verbose){
+            std::cout << "On Layer " << i << std::endl;
+            std::cout << "  regenWidth: " << lstyle.regenWidth << std::endl;
+            std::cout << "  regenMaskWidth: " << lstyle.regenMaskWidth << std::endl;
+            std::cout << "  avgBrushWidth: " << lstyle.avgBrushWidth << std::endl;
+            std::cout << "  varBrushWidth: " << lstyle.varBrushWidth << std::endl;
+            std::cout << "  opacity: " << lstyle.opacity << std::endl;
+            std::cout << "  strengthThreshold: " << lstyle.strengthThreshold << std::endl;
+            std::cout << "  strengthNeighborhood: " << lstyle.strengthNeighborhood << std::endl;             
+        }      
 
+        int kernelSize = (int)(1.0 * lstyle.avgBrushWidth/2.0); 
+        // needs to be positively odd
+        if(kernelSize/2.0 == std::floor(kernelSize/2.0))
+            kernelSize ++;
+
+        if(verbose)
+            std::cout << "  kernelSize: " << kernelSize << std::endl;
+
+        if(i != canvas.layers.size()-1) // absolutely do not blur the top image jeez 
+            GaussianBlur(image, blurimages[i], Size(kernelSize, kernelSize), 0, 0, BORDER_DEFAULT);
+ 
+        buildStrokes(layer, lstyle);
+        angleStrokes(layer, lstyle);
+        clipStrokes(layer, lstyle);
+        colorStrokes(layer, lstyle);
+
+        if(verbose)
+            std::cout << std::endl;
     }
 }
 
@@ -70,9 +96,118 @@ void Processor::saveToFile(std::string outFile){
 }
 
 
+// Get anchors, set width + opacity
 void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
+    int k = .25 * canvas.width * canvas.height; // why not, obviously a factor of image size
+    int stopthresh = k * .001;
+    int countstop = 0;    
+    double wrhalf = lstyle.regenWidth / 2.0;
 
 
+    if(verbose){
+        std::cout << "buildingStrokes!" << std::endl;
+        std::cout << "  k: " << k << std::endl;
+        std::cout << "  stopthresh: " << stopthresh << std::endl;
+    }
+
+    // Create a mask to store placed brushstrokes and allowed placement locations
+    Scalar s = 0;
+    Mat maskimg(canvas.height, canvas.width, CV_8UC1, s);     
+    Size maskSize = maskimg.size();
+    // if regenMaskWidth == 0, this is the bottom layer and should subsequently be fully covered
+
+    for(int i = 0; i < k; ++i){
+        if(countstop > stopthresh){
+            if(verbose){
+                std::cout << "breaking: reached stopthresh" << std::endl;
+            }
+            break;
+        }
+        
+        int r = rand()%maskSize.height;
+        int c = rand()%maskSize.width;
+        
+        int rs = std::max(0, (int)(r-wrhalf));
+        int re = std::min((int)(r+wrhalf), maskSize.height);
+        int cs = std::max(0, (int)(c-wrhalf));
+        int ce = std::min((int)(c+wrhalf), maskSize.width);
+
+        if(verbose){
+            std::cout << "test position: " << r << ", " << c << std::endl;
+            std::cout << "  r: [" << rs << ", " << re << "]" << std::endl;
+            std::cout << "  c: [" << cs << ", " << ce << "]" << std::endl;
+        }
+        
+        if(countNonZero(maskimg(Range(rs, re), Range(cs, ce))) > 0){
+            countstop++;
+            if(verbose){
+                std::cout << "  rejected" << std::endl;
+                std::cout << "  countstop: " << countstop << std::endl;
+            }
+            continue;
+        }
+        
+        // valid position
+    
+        countstop = 0;
+        maskimg.at<uchar>(r, c) = 255;
+        
+        Brushstroke b;
+        b.anchor = Point2d(c, r);
+        b.width = lstyle.avgBrushWidth + (2.0*(double)rand()/(RAND_MAX) - 1.0)*lstyle.varBrushWidth; 
+        b.opacity = lstyle.opacity;
+
+        if(verbose){
+            std::cout << "  New stroke: " << std::endl;
+            std::cout << "      anchor: " << b.anchor << std::endl;
+            std::cout << "      width: " << b.width << std::endl;
+            std::cout << "      opacity: " << b.opacity << std::endl;
+        }
+
+
+        layer.strokes.push_back(b);
+    }
+
+    if(verbose){
+        std::cout << "-------------Postprocessing stroke generation----------------" << std::endl;
+    }
+        
+    for(int r = 0; r < maskSize.height; ++r){
+        for(int c = 0; c < maskSize.width; ++c){
+       
+            int rs = std::max(0, (int)(r-wrhalf)); 
+            int re = std::min((int)(r+wrhalf), maskSize.height);
+            int cs = std::max(0, (int)(c-wrhalf));
+            int ce = std::min((int)(c+wrhalf), maskSize.width);
+
+            if (countNonZero(maskimg(Range(rs, re), Range(cs, ce))) >= 1){
+                continue;
+            }
+            // valid point
+
+    
+            maskimg.at<uchar>(r,c) = 255; 
+
+            Brushstroke b;
+            b.anchor = Point2d(c, r);
+            b.width = lstyle.avgBrushWidth + (2.0*(double)rand()/(RAND_MAX) - 1.0)*lstyle.varBrushWidth; 
+            b.opacity = lstyle.opacity;
+
+            if(verbose){
+                std::cout << "  New stroke: " << std::endl;
+                std::cout << "      anchor: " << b.anchor << std::endl;
+                std::cout << "      width: " << b.width << std::endl;
+                std::cout << "      opacity: " << b.opacity << std::endl;
+            }
+
+            layer.strokes.push_back(b);
+        }
+    }
+   
+    if(verbose){
+        std::cout << "Done building strokes..." << std::endl;
+        displayImage(maskimg, "Brush anchors");
+    }
 }
 
 void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle){
@@ -90,7 +225,11 @@ void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle){
 
 }
 
-
+void Processor::displayImage(cv::Mat img, std::string windowName){
+    namedWindow(windowName, WINDOW_NORMAL);
+    imshow(windowName, img);
+    waitKey(0);
+}
 
 
 
