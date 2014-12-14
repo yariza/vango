@@ -9,6 +9,7 @@
 #include "canvas/Brushstroke.h"
 #include "canvas/Canvas.h"
 #include "canvas/Layer.h"
+#include "canvas/ColorUtils.h"
 
 class Processor {
 public:

@@ -3,3 +3,4 @@
 #define RGB_TO_SCALAR(x) CV_RGB(x[0],x[1],x[2])
 #define Rect2d Rect_<double>
 #define CLAMP(x, a, b)  ((x) < (a) ? (a) : ((x) > (b) ? (b) : (x)))
+#define BGR_TO_RGBDOUBLE(x) Vec3d(x[2]/255.0, x[1]/255.0, x[0]/255.0)

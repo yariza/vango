@@ -153,10 +153,6 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
         maskimg.at<uchar>(r, c) = 255;
         
         Brushstroke b;
-        //b.anchor = Point2d(c, r);
-        //b.width = lstyle.avgBrushWidth + (2.0*(double)rand()/(RAND_MAX) - 1.0)*lstyle.varBrushWidth; 
-        //b.opacity = lstyle.opacity;
-
         makeDummyStroke(b, Point2d(c, r), lstyle.avgBrushWidth, lstyle.varBrushWidth, lstyle.opacity);
 
         if(verbose){
@@ -165,7 +161,6 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
             std::cout << "      width: " << b.width << std::endl;
             std::cout << "      opacity: " << b.opacity << std::endl;
         }
-
 
         layer.strokes.push_back(b);
     }
@@ -191,10 +186,6 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
             maskimg.at<uchar>(r,c) = 255; 
 
             Brushstroke b;
-            //b.anchor = Point2d(c, r);
-            //b.width = lstyle.avgBrushWidth + (2.0*(double)rand()/(RAND_MAX) - 1.0)*lstyle.varBrushWidth; 
-            //b.opacity = lstyle.opacity;
-
             makeDummyStroke(b, Point2d(c, r), lstyle.avgBrushWidth, lstyle.varBrushWidth, lstyle.opacity);
 
             if(verbose){
@@ -225,8 +216,16 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle){
 }
 
 void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle){
+    // for now, just use the color at the anchor point
+    
+    Vec3b col; 
+    double scale = canvStyle.canvasScale;
+    for(int i = 0; i < layer.strokes.size(); ++i){
+        Brushstroke& stroke = layer.strokes[i];
+        col = image.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y/scale));
+        stroke.color = BGR_TO_RGBDOUBLE(col);
 
-
+    }
 }
 
 void Processor::makeDummyStroke(Brushstroke& stroke, Point2d ankh, double avgWb, double dWb, double opac){
