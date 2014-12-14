@@ -35,8 +35,8 @@ public:
 private:
 
     void buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
-    void angleStrokes(Layer& layer, LayerStyle& lstyle);
-    void clipStrokes(Layer& layer, LayerStyle& lstyle);
+    void angleStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
+    void clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
     void colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage);
     
     void makeDummyStroke(Brushstroke& stroke, cv::Point2d ankh, double avgWb, double dWb, double opac);

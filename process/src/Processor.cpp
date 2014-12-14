@@ -74,8 +74,8 @@ void Processor::processImage() {
             GaussianBlur(image, blurimages[i], Size(kernelSize, kernelSize), 0, 0, BORDER_DEFAULT);
  
         buildStrokes(layer, lstyle, blurimages[i]);
-        angleStrokes(layer, lstyle);
-        clipStrokes(layer, lstyle);
+        angleStrokes(layer, lstyle, blurimages[i]);
+        clipStrokes(layer, lstyle, blurimages[i]);
         colorStrokes(layer, lstyle, blurimages[i]);
 
         if(verbose)
@@ -215,17 +215,19 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg)
     }
 }
 
-void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle){
+void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimage){
 
 
 }
 
-void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle){
+void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimage){
+    
+
 
 
 }
 
-void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage){
+void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimage){
     // for now, just use the color at the anchor point
     
     if(verbose){
@@ -237,7 +239,7 @@ void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& bimage){
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
         // use blurred image when getting color 
-        col = bimage.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y / scale));
+        col = blurimage.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y / scale));
         stroke.color = BGR_TO_RGBDOUBLE(col);
 
         if(verbose){
@@ -264,9 +266,10 @@ void Processor::makeDummyStroke(Brushstroke& stroke, Point2d ankh, double avgWb,
 }
 
 void Processor::createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwidth){
-    Mat grayimg;
+//    Mat grayimg;
     Mat threshimg; 
-    cvtColor(blurimg, grayimg, CV_RGB2GRAY); // intensity image
+//    cvtColor(blurimg, grayimg, CV_RGB2GRAY); // intensity image
+    Mat grayimg = blurimg.clone();
     Mat gradX, gradY;
     Mat grad; 
     double kernelsize = 3;
@@ -287,9 +290,11 @@ void Processor::createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwid
         std::cout << "  thresholding..." << std::endl;
         std::cout << "  threshvalue: " << threshval << std::endl;
     }
-    
+
     threshold(grad, threshimg, threshval, 255, 1);
     threshimg.convertTo(threshimg, CV_8U, 1);
+    cvtColor(threshimg, threshimg, CV_RGB2GRAY);
+    threshold(threshimg, threshimg, 20, 255, 0);
     if(verbose){
         displayImage(threshimg, "mask before hole-filling");
     }
@@ -298,12 +303,14 @@ void Processor::createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwid
     morphologyEx(threshimg, threshimg,  MORPH_OPEN, element);
     
     if(verbose){
+        std::cout << "threshtype: " << threshimg.type() << std::endl;
         displayImage(threshimg, "mask after hole-filling");
     }
 
-    resize(threshimg, mask, mask.size(), 0, 0, INTER_LINEAR);
-    //dilate(mask, mask, Mat(), Point(-1, -1), (int)rmaskwidth);
     
+    resize(threshimg, mask, mask.size(), 0, 0, INTER_LINEAR);
+    // set mask value
+ 
 } 
 
 void Processor::displayImage(cv::Mat& img, std::string windowName){
