@@ -37,7 +37,8 @@ private:
     void angleStrokes(Layer& layer, LayerStyle& lstyle);
     void clipStrokes(Layer& layer, LayerStyle& lstyle);
     void colorStrokes(Layer& layer, LayerStyle& lstyle);
-
+    
+    void makeDummyStroke(Brushstroke& stroke, cv::Point2d ankh, double avgWb, double dWb, double opac);
     void displayImage(cv::Mat img, std::string windowName);
 
     cv::Mat image;

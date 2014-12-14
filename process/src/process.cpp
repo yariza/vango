@@ -41,5 +41,5 @@ int main(int argc, char** argv) {
 
     processor.processImage();
 
-    //processor.saveToFile(outFile);    
+    processor.saveToFile(outFile);    
 }

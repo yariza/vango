@@ -153,9 +153,11 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
         maskimg.at<uchar>(r, c) = 255;
         
         Brushstroke b;
-        b.anchor = Point2d(c, r);
-        b.width = lstyle.avgBrushWidth + (2.0*(double)rand()/(RAND_MAX) - 1.0)*lstyle.varBrushWidth; 
-        b.opacity = lstyle.opacity;
+        //b.anchor = Point2d(c, r);
+        //b.width = lstyle.avgBrushWidth + (2.0*(double)rand()/(RAND_MAX) - 1.0)*lstyle.varBrushWidth; 
+        //b.opacity = lstyle.opacity;
+
+        makeDummyStroke(b, Point2d(c, r), lstyle.avgBrushWidth, lstyle.varBrushWidth, lstyle.opacity);
 
         if(verbose){
             std::cout << "  New stroke: " << std::endl;
@@ -189,9 +191,11 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle){
             maskimg.at<uchar>(r,c) = 255; 
 
             Brushstroke b;
-            b.anchor = Point2d(c, r);
-            b.width = lstyle.avgBrushWidth + (2.0*(double)rand()/(RAND_MAX) - 1.0)*lstyle.varBrushWidth; 
-            b.opacity = lstyle.opacity;
+            //b.anchor = Point2d(c, r);
+            //b.width = lstyle.avgBrushWidth + (2.0*(double)rand()/(RAND_MAX) - 1.0)*lstyle.varBrushWidth; 
+            //b.opacity = lstyle.opacity;
+
+            makeDummyStroke(b, Point2d(c, r), lstyle.avgBrushWidth, lstyle.varBrushWidth, lstyle.opacity);
 
             if(verbose){
                 std::cout << "  New stroke: " << std::endl;
@@ -224,6 +228,21 @@ void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle){
 
 
 }
+
+void Processor::makeDummyStroke(Brushstroke& stroke, Point2d ankh, double avgWb, double dWb, double opac){
+    stroke.anchor = ankh;
+    stroke.width = avgWb + (2.0*(double)rand()/(RAND_MAX) - 1.0)*dWb;
+    stroke.opacity = opac; 
+
+    // dummy values for other parameters
+    stroke.angle = .78;
+    stroke.strength = 0;
+    stroke.length1 = 4;
+    stroke.length2 = 10;
+    stroke.color = Vec3d(.5, .5, .5);
+
+}
+
 
 void Processor::displayImage(cv::Mat img, std::string windowName){
     namedWindow(windowName, WINDOW_NORMAL);
