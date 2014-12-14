@@ -274,7 +274,42 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
 
         }
         
-    
+        // now do x2
+        keepgoing = true;
+        getRectSubPix(grad, Size(1,1), x2, pix);
+        oldSample = pix.at<float>(0, 0);
+        newSample = std::numeric_limits<float>::max();
+        tempx.x = x2.x;
+        tempx.y = x2.y;        
+
+        while(keepgoing){
+            tempx.x = x2.x - dirX;
+            tempx.y = x2.y - dirY;
+
+            if(dist(tempx, stroke.anchor) > maxLength)
+                break;
+
+            getRectSubPix(grad, Size(1,1), tempx, pix);
+            newSample = pix.at<float>(0, 0);
+            if(newSample < oldSample)
+                break;
+                
+            x2.x = tempx.x;
+            x2.y = tempx.y;
+            oldSample = newSample;
+        }   
+
+        stroke.length1 = dist(x1, stroke.anchor);
+        stroke.length2 = dist(x2, stroke.anchor);
+        
+        if(verbose){
+            std::cout << "for stroke at " << stroke.anchor << std::endl;
+            std::cout << "  length 1: " << stroke.length1 << std::endl;
+            std::cout << "  length 2: " << stroke.length2 << std::endl;
+   
+        }
+
+ 
     }
     if(verbose){
         std::cout << "Done clipping strokes..............." << std::endl;
@@ -320,20 +355,16 @@ void Processor::makeDummyStroke(Brushstroke& stroke, Point2d ankh, double avgWb,
 }
 
 void Processor::createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwidth){
-//    Mat grayimg;
     Mat threshimg; 
-//    cvtColor(blurimg, grayimg, CV_RGB2GRAY); // intensity image
-    Mat grayimg = blurimg.clone();
-    Mat gradX, gradY;
-    Mat grad; 
-    double kernelsize = 3;
-
+    Mat grayimg;
+    cvtColor(blurimg, grayimg, CV_RGB2GRAY);    
+    Mat gradX, gradY, grad;
+    int kernelsize = 3;
     if(verbose){
         std::cout << "creating RegenMask" << std::endl;
         std::cout << "  kernelsize: " << kernelsize << std::endl;
     }
 
-    std::cout << "scale : " << canvStyle.canvasScale << std::endl;
     Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
     Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
     magnitude(gradX, gradY, grad);
@@ -341,13 +372,15 @@ void Processor::createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwid
     double threshval = 10.0; 
 
     if(verbose){
+        displayImage(grad, "sobel image");
+    
         std::cout << "  thresholding..." << std::endl;
         std::cout << "  threshvalue: " << threshval << std::endl;
     }
 
     threshold(grad, threshimg, threshval, 255, 1);
     threshimg.convertTo(threshimg, CV_8U, 1);
-    cvtColor(threshimg, threshimg, CV_RGB2GRAY);
+//    cvtColor(threshimg, threshimg, CV_RGB2GRAY);
     threshold(threshimg, threshimg, 20, 255, 0);
 
     double erodekernel = rmaskwidth/2.0;
