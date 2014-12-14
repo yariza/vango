@@ -3,8 +3,12 @@
 
 #include <opencv2/opencv.hpp>
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include <time.h>
 #include "canvas/Brushstroke.h"
+#include "canvas/Canvas.h"
+#include "canvas/Layer.h"
 
 class Processor {
 public:

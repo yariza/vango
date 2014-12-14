@@ -95,14 +95,15 @@ void Processor::placeStrokes(){
     std::vector<Brushstroke> strokes;
     srand(time(NULL));
 
-    std::cout << countNonZero(maskimg) << std::endl;
+    //std::cout << countNonZero(maskimg) << std::endl;
+
 
     for (int i = 0; i < k; ++i){
         if(countstop > stopthresh){
             std::cout << "breaking: reached stopthresh" << std::endl;
             break;
         }
-        std::cout << countstop << std::endl;
+        //std::cout << countstop << std::endl;
         int r = rand()%maskSize.height;
         int c = rand()%maskSize.width;                  
        
@@ -120,6 +121,13 @@ void Processor::placeStrokes(){
         countstop = 0;
         //std::cout << "setting " << std::endl;
         maskimg.at<uchar>(r,c) = 255; 
+
+        Brushstroke b;
+        b.anchor = Point2d(r, c);
+        strokes.push_back(b);
+                
+
+
         
         //std::cout << "r: " << rs << ", " << re << std::endl;
         //std::cout << "c: " << cs << ", " << ce << std::endl;
@@ -134,13 +142,13 @@ void Processor::placeStrokes(){
     
     }
   
-    std::cout << countNonZero(maskimg) << std::endl;
+    //std::cout << countNonZero(maskimg) << std::endl;
 
     namedWindow("gradWind", CV_WINDOW_NORMAL);
     imshow("gradWind", maskimg);
     waitKey(0); 
 
-    std::cout << "postprocessing... fill in the holes" << std::endl;
+    //std::cout << "postprocessing... fill in the holes" << std::endl;
     
     for(int r = 0; r < maskSize.height; ++r){
         for(int c = 0; c < maskSize.width; ++c){
@@ -155,8 +163,13 @@ void Processor::placeStrokes(){
                 //std::cout << "rejected " << std::endl;
                 continue;
             }
-            std::cout << "setting " << r << ", " << c << std::endl;
+            //std::cout << "setting " << r << ", " << c << std::endl;
             maskimg.at<uchar>(r,c) = 255; 
+
+            Brushstroke b;
+            b.anchor = Point2d(r, c);
+            strokes.push_back(b); 
+
         }
     }
 
@@ -193,6 +206,59 @@ void Processor::placeStrokes(){
         }
     }  
 */
+
+    std::cout << "strokes: " << strokes.size() << std::endl;
+
+
+    // Oh gods okay let's add to this monstrosity... 
+    // fill filler values for now... 
+    
+    // angles!
+    
+    for (int i = 0; i < strokes.size(); ++i){
+        Brushstroke& stroke = strokes[i];
+        stroke.angle = .78;
+        stroke.strength = 0;
+        stroke.length1 = 10;
+        stroke.length2 = 20;
+        stroke.width = 4;
+        stroke.opacity = 1.0;
+        Vec3b col = image.at<Vec3b>(Point(stroke.anchor.x/scale, stroke.anchor.y/scale));
+        stroke.color = Vec3d(col[0]/255.0, col[1]/255.0, col[2]/255.0);
+         //Vec3b col = image.at<Vec3b>(Point(x/2,y/2));
+    }
+
+
+    Canvas canvas; 
+    canvas.width = maskSize.width;
+    canvas.height = maskSize.height;
+    
+    std::vector<Layer> layers; 
+    Layer onlyLayer;
+    onlyLayer.strokes = strokes;
+
+    layers.push_back(onlyLayer);
+    canvas.layers = layers;
+    
+
+    YAML::Emitter yout; 
+    //YAML::Node canvasNode = YAML::Load(canvas);
+    YAML::convert<Canvas> ccon;
+    YAML::Node canvasNode = ccon.encode(canvas);
+        
+
+    yout << canvasNode;
+
+
+    std::ofstream fout;
+    fout.open("testthing.YAML");
+    fout << yout.c_str();    
+    fout.close();
+
+    //out << canvas;
+    //YAML::Node canvasNode; 
+    
+    
 
 }
 
