@@ -41,6 +41,7 @@ private:
     
     void makeDummyStroke(Brushstroke& stroke, cv::Point2d ankh, double avgWb, double dWb, double opac);
     void createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwidth);
+    double dist(cv::Point2d& x1, cv::Point2d& x2);
     void displayImage(cv::Mat& img, std::string windowName);
 
     cv::Mat image;

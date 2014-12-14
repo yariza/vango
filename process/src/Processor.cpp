@@ -235,7 +235,7 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
     Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
     Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
     magnitude(gradX, gradY, grad);
-    double maxlength = lstyle.maxBrushLength;     
+    double maxLength = lstyle.maxBrushLength/2.0;     
 
     if(verbose){
         Mat sobelimg;
@@ -253,14 +253,28 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
         float oldSample = pix.at<float>(0, 0);
         float newSample = std::numeric_limits<float>::max();
         double dirX = cos(stroke.angle);
-        double dirY = sin(stroke.angle);
-        
-        tempx.x = x1.x + dirX;
-        tempx.y = x1.y + dirY;
+        double dirY = sin(stroke.angle);        
 
-        
-              
+        bool keepgoing = true;
+        while (keepgoing){
+            tempx.x = x1.x + dirX;
+            tempx.y = x1.y + dirY;
 
+            if(dist(tempx, stroke.anchor) > maxLength)
+                break;
+
+            getRectSubPix(grad, Size(1,1), tempx, pix);
+            newSample = pix.at<float>(0, 0);
+            if(newSample < oldSample)
+                break;
+                
+            x1.x = tempx.x;
+            x1.y = tempx.y;
+            oldSample = newSample;
+
+        }
+        
+    
     }
     if(verbose){
         std::cout << "Done clipping strokes..............." << std::endl;
@@ -335,6 +349,18 @@ void Processor::createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwid
     threshimg.convertTo(threshimg, CV_8U, 1);
     cvtColor(threshimg, threshimg, CV_RGB2GRAY);
     threshold(threshimg, threshimg, 20, 255, 0);
+
+    double erodekernel = rmaskwidth/2.0;
+    if((int)(erodekernel/2.0) == erodekernel/2.0)
+        erodekernel ++;
+    if(verbose){
+        displayImage(threshimg, "before erosion");
+    }
+
+    Mat erodelem = getStructuringElement(MORPH_ELLIPSE, Size(erodekernel, erodekernel));
+    erode(threshimg, threshimg, erodelem);
+
+
     if(verbose){
         displayImage(threshimg, "mask before hole-filling");
     }
@@ -346,12 +372,17 @@ void Processor::createRegenMask(cv::Mat& mask, cv::Mat& blurimg, double rmaskwid
         std::cout << "threshtype: " << threshimg.type() << std::endl;
         displayImage(threshimg, "mask after hole-filling");
     }
-
+    
     
     resize(threshimg, mask, mask.size(), 0, 0, INTER_LINEAR);
     // set mask value
  
 } 
+
+double Processor::dist(Point2d& x1, Point2d& x2){
+    return sqrt(((x1.x - x2.x)*(x1.x - x2.x)) + ((x1.y - x2.y)*(x1.y - x2.y)));
+}
+
 
 void Processor::displayImage(cv::Mat& img, std::string windowName){
     namedWindow(windowName, WINDOW_NORMAL);
