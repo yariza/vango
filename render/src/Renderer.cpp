@@ -14,7 +14,7 @@ void Renderer::load(Canvas my_canvas, CanvasStyle my_style)
 void Renderer::display(bool newWindow, bool wait)
 {
     if (newWindow)
-        namedWindow("Vango Renderer", CV_WINDOW_AUTOSIZE);
+        namedWindow("Vango Renderer", CV_WINDOW_NORMAL);
 
     imshow("Vango Renderer", color);
 

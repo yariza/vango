@@ -89,12 +89,14 @@ void Processor::placeStrokes(){
 
     Size imgSize = image.size();
     Scalar s = 0;
-    Mat maskimg(imgSize.height*2, imgSize.width*2, CV_8UC1, s);
+    Mat maskimg(imgSize.height*scale, imgSize.width*scale, CV_8UC1, s);
     Size maskSize = maskimg.size();
 
     std::vector<Brushstroke> strokes;
     srand(time(NULL));
 
+    std::cout << "image size: " << imgSize << std::endl;
+    std::cout << "canvas Size: " << maskSize << std::endl;
     //std::cout << countNonZero(maskimg) << std::endl;
 
 
@@ -123,7 +125,7 @@ void Processor::placeStrokes(){
         maskimg.at<uchar>(r,c) = 255; 
 
         Brushstroke b;
-        b.anchor = Point2d(r, c);
+        b.anchor = Point2d(c, r);
         strokes.push_back(b);
                 
 
@@ -167,7 +169,7 @@ void Processor::placeStrokes(){
             maskimg.at<uchar>(r,c) = 255; 
 
             Brushstroke b;
-            b.anchor = Point2d(r, c);
+            b.anchor = Point2d(c, r);
             strokes.push_back(b); 
 
         }
@@ -185,7 +187,7 @@ void Processor::placeStrokes(){
         for(int j = 0; j < imgSize.width; ++j){
     
             if(maskimg.at<uchar>(i*2.0, j*2.0) > 100){
-                image.at<Vec3b>(i,j) = {0, 0, 0};
+                //image.at<Vec3b>(i,j) = {0, 0, 0};
             }
 
         }
@@ -215,19 +217,27 @@ void Processor::placeStrokes(){
     
     // angles!
     
+    std::cout << "starting brush setting" << std::endl;
     for (int i = 0; i < strokes.size(); ++i){
         Brushstroke& stroke = strokes[i];
         stroke.angle = .78;
         stroke.strength = 0;
-        stroke.length1 = 10;
-        stroke.length2 = 20;
-        stroke.width = 4;
+        stroke.length1 = 4;
+        stroke.length2 = 4;
+        stroke.width = 8;
         stroke.opacity = 1.0;
+        //std::cout << "try to access color at " << stroke.anchor.x/scale << ", " << stroke.anchor.y/scale << std::endl;
         Vec3b col = image.at<Vec3b>(Point(stroke.anchor.x/scale, stroke.anchor.y/scale));
-        stroke.color = Vec3d(col[0]/255.0, col[1]/255.0, col[2]/255.0);
+        //std::cout << "original color: " << (int)col[0] << ", " << (int)col[1] << ", " << (int)col[2] << std::endl;
+        stroke.color = Vec3d(col[2]/255.0, col[1]/255.0, col[0]/255.0);
+        //std::cout << stroke.color[0] << ", " << stroke.color[1] << ", " << stroke.color[2] << std::endl;
          //Vec3b col = image.at<Vec3b>(Point(x/2,y/2));
+        if (stroke.color[0] < .000001 && stroke.color[1] < .0000001 && stroke.color[2] < .0000001){
+            std::cout << "0 at: " << stroke.anchor.x << ", " << stroke.anchor.y << std::endl;
+        }
     }
 
+    std::cout << "ending brush setting" << std::endl;
 
     Canvas canvas; 
     canvas.width = maskSize.width;
@@ -251,7 +261,7 @@ void Processor::placeStrokes(){
 
 
     std::ofstream fout;
-    fout.open("testthing.YAML");
+    fout.open("testthing.yaml");
     fout << yout.c_str();    
     fout.close();
 
