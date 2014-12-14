@@ -10,6 +10,7 @@
 #define REGEN_WIDTH_KEY "regen_width"
 #define AVG_BRUSH_WIDTH_KEY "avg_brush_width"
 #define VAR_BRUSH_WIDTH_KEY "var_brush_width"
+#define MAX_BRUSH_LENGTH_KEY "max_brush_length"
 #define STYLE_OPACITY_KEY "opacity"
 #define REGEN_MASK_WIDTH_KEY "regen_mask_width"
 #define STRENGTH_THRESHOLD_KEY "strength_threshold"
@@ -27,6 +28,7 @@ public:
     double regenWidth;
     double avgBrushWidth;
     double varBrushWidth;
+    double maxBrushLength;
 
     double opacity;
 
@@ -63,6 +65,7 @@ namespace YAML {
             node[REGEN_WIDTH_KEY] = style.regenWidth;
             node[AVG_BRUSH_WIDTH_KEY] = style.avgBrushWidth;
             node[VAR_BRUSH_WIDTH_KEY] = style.varBrushWidth;
+            node[MAX_BRUSH_LENGTH_KEY] = style.maxBrushLength;
             node[STYLE_OPACITY_KEY] = style.opacity;
             node[REGEN_MASK_WIDTH_KEY] = style.regenMaskWidth;
             node[STRENGTH_THRESHOLD_KEY] = style.strengthThreshold;
@@ -81,6 +84,7 @@ namespace YAML {
             style.regenWidth = node[REGEN_WIDTH_KEY].as<double>();
             style.avgBrushWidth = node[AVG_BRUSH_WIDTH_KEY].as<double>();
             style.varBrushWidth = node[VAR_BRUSH_WIDTH_KEY].as<double>();
+            style.maxBrushLength = node[MAX_BRUSH_LENGTH_KEY].as<double>();
             style.opacity = node[STYLE_OPACITY_KEY].as<double>();
             style.regenMaskWidth = node[REGEN_MASK_WIDTH_KEY].as<double>();
             style.strengthThreshold = node[STRENGTH_THRESHOLD_KEY].as<double>();

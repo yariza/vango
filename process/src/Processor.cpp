@@ -33,6 +33,8 @@ void Processor::initialize(std::string imgFile, std::string styleFile, bool verb
         canvas.layers.push_back(l);
         blurimages.push_back(image.clone());
     }
+    
+    srand(time(NULL));
 
     if(verbose){
         std::cout << "Reading canvas -done- " << std::endl;
@@ -123,8 +125,7 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg)
     Size maskSize = maskimg.size();
     // if regenMaskWidth == 0, this is the bottom layer and should subsequently be fully covered
     if (lstyle.regenMaskWidth > .00000001){
-        createRegenMask(maskimg, blurimg, lstyle.regenMaskWidth);
-
+        createRegenMask(maskimg, blurimg, lstyle.regenMaskWidth);        
     }
 
     for(int i = 0; i < k; ++i){
@@ -215,19 +216,58 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg)
     }
 }
 
-void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimage){
+void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
 
 
 }
 
-void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimage){
-    
+void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
+    if(verbose){
+        std::cout << "Clipping strokes..................." << std::endl;
+    }
+   
+    // edges detected based on Sobel-filtered gradients of the intensity image
+    Mat grayimg;
+    cvtColor(blurimg, grayimg, CV_RGB2GRAY);    
+    Mat gradX, gradY, grad;
+    int kernelsize = 3;
 
+    Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
+    Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
+    magnitude(gradX, gradY, grad);
+    double maxlength = lstyle.maxBrushLength;     
 
+    if(verbose){
+        Mat sobelimg;
+        grad.convertTo(sobelimg, CV_8U, 1);
+        displayImage(sobelimg, "sobel gradient");
+    }
 
+    for(int i = 0; i < layer.strokes.size(); ++i){
+        Brushstroke& stroke = layer.strokes[i];
+        Point2d x1 = Point2d(stroke.anchor);
+        Point2d x2 = Point2d(stroke.anchor);
+        Point2d tempx = Point2d(stroke.anchor);
+        Mat pix;
+        getRectSubPix(grad, Size(1, 1), x1, pix);
+        float oldSample = pix.at<float>(0, 0);
+        float newSample = std::numeric_limits<float>::max();
+        double dirX = cos(stroke.angle);
+        double dirY = sin(stroke.angle);
+        
+        tempx.x = x1.x + dirX;
+        tempx.y = x1.y + dirY;
+
+        
+              
+
+    }
+    if(verbose){
+        std::cout << "Done clipping strokes..............." << std::endl;
+    }
 }
 
-void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimage){
+void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimg){
     // for now, just use the color at the anchor point
     
     if(verbose){
@@ -239,7 +279,7 @@ void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, cv::Mat& blurimag
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
         // use blurred image when getting color 
-        col = blurimage.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y / scale));
+        col = blurimg.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y / scale));
         stroke.color = BGR_TO_RGBDOUBLE(col);
 
         if(verbose){
@@ -337,6 +377,14 @@ void Processor::ignorethisblurImage(double kernelwidth, double kernelheight){
 }
 
 void Processor::ignorethisdoSobel(int kernelsize){
+    /* // Edge detection with Canny filter
+    Mat edges; 
+    int lowthresh = 1;
+    int kernelsize = 3;
+    Canny(blurimg, edges, lowthresh, lowthresh*3, kernelsize);
+    displayImage(edges, "edges!!");   
+    */
+
     Mat grayimg;
     cvtColor(image, grayimg, CV_RGB2GRAY);
     Mat gradX, gradY;
