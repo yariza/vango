@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <yaml-cpp/yaml.h>
+#include "ColorUtils.h"
 
 #define ANCHOR_KEY "anchor"
 #define ANGLE_KEY "angle"
@@ -38,11 +39,11 @@ public:
     // color (R,G,B). Types are in double (0-1).
     Vec3d color;
 
-    void draw(Mat& colorMap, Mat& heightMap,
-              Mat& texture, Mat& mask,
-              double layerOpacity, double spacing, double jitter);
+    void draw(Mat& alphaMap, Mat& mask,
+              double spacing, double jitter);
 
 private:
+    void renderTexture(Mat& alphaMap, Mat& mask, RotatedRect& maskRect);
 };
 
 namespace YAML {

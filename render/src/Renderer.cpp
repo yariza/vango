@@ -25,7 +25,7 @@ void Renderer::display(bool newWindow, bool wait)
 void Renderer::initialize()
 {
     color = Mat::zeros(canvas.height, canvas.width, CV_64FC3);
-    height = Mat::zeros(canvas.height, canvas.width, CV_64FC1);
+    height = Mat::zeros(canvas.height, canvas.width, CV_64FC3);
 
     color.setTo(Vec3d(1,1,1));
 }

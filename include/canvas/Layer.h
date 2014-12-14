@@ -12,6 +12,10 @@ public:
     std::vector<Brushstroke> strokes;
 
     void draw(Mat& color, Mat& height, LayerStyle& style);
+    void blend(Mat& colorMap, Mat& heightMap,
+                      Mat& fg_c, Mat& fg_a, Mat& fg_h,
+                      double opacity);
+    void tileTexture(Mat& src, Mat& dst);
 };
 
 namespace YAML {

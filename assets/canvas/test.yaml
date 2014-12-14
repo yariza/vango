@@ -4,9 +4,9 @@ layers:
     -
         -
             anchor: [100, 200]
-            angle: 0.3
+            angle: 0.8
             length1: 50
             length2: 60
             width: 10.0
-            opacity: 0.6
+            opacity: 0.7
             color: [1.0, 0.0, 0.0]
