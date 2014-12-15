@@ -202,10 +202,10 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     if(verbose){
         std::cout << "-------------Postprocessing stroke generation----------------" << std::endl;
     }
-        
+
     for(int r = 0; r < maskSize.height; ++r){
         for(int c = 0; c < maskSize.width; ++c){
-       
+
             int rs = std::max(0, (int)(r-wrhalf)); 
             int re = std::min((int)(r+wrhalf), maskSize.height);
             int cs = std::max(0, (int)(c-wrhalf));
@@ -215,7 +215,7 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
                 continue;
             }
             // valid point
- 
+
             maskimg.at<uchar>(r,c) = 255; 
 
             Brushstroke b;
@@ -231,7 +231,7 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
             layer.strokes.push_back(b);
         }
     }
-   
+
     if(verbose){
         std::cout << "Done building strokes..." << std::endl;
         displayImage(maskimg, "Brush anchors");
@@ -244,30 +244,10 @@ void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, int lid){
 
     }
 
-    /*
-    Mat grayimg;
-    cvtColor(blurimages[lid], grayimg, CV_RGB2GRAY);    
-    Mat gradX;
-    Mat gradY;
-    Mat grad;
-
-    int kernelsize = 3;
-
-    Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
-    Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
-    magnitude(gradX, gradY, grad);
- 
-    if(verbose){
-        Mat sobelimg;
-        grad.convertTo(sobelimg, CV_8U, 1);
-        displayImage(sobelimg, "angle sobel gradient");
-    }
-    */
-
     Mat& grad = gradimages[lid];
     Mat& gradX = gradXimages[lid];
     Mat& gradY = gradYimages[lid];
-    
+
 
     double scale = canvStyle.canvasScale; 
     Mat pix;
@@ -284,22 +264,23 @@ void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, int lid){
 
 
         stroke.angle = atan2(bgradY, bgradX) + PI/2;
-        float gradthresh = 10;        
 
-        stroke.strength = bgrad; 
+        stroke.strength = bgrad;        
 
         if(verbose){
             std::cout << "At stroke " << stroke.anchor << std::endl;
             std::cout << "  grad: " << bgradX << ", " << bgradY << std::endl;
             std::cout << "  angle: " << stroke.angle << std::endl;
-
+            std::cout << "  strength: " << stroke.strength << std::endl;
         }
 
     }
 
     if(verbose){
-        std::cout << "finished angling" << std::endl;
+        std::cout << "finished initial angling" << std::endl;
     }
+
+    interpAngles(layer, lstyle, lid);
 }
 
 void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
@@ -307,22 +288,13 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     if(verbose){
         std::cout << "Clipping strokes..................." << std::endl;
     }
-   
-    // edges detected based on Sobel-filtered gradients of the intensity image
-    //Mat grayimg;
-    //cvtColor(blurimg, grayimg, CV_RGB2GRAY);    
-    //Mat gradX, gradY, grad;
-    //int kernelsize = 3;
 
-    //Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
-    //Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
-    //magnitude(gradX, gradY, grad);
-       
+    // edges detected based on Sobel-filtered gradients of the intensity image
     Mat& grad = gradimages[lid];
 
     double maxLength = lstyle.maxBrushLength/2.0;     
     double scale = canvStyle.canvasScale;
-    
+
     if(verbose){
         Mat sobelimg;
         grad.convertTo(sobelimg, CV_8U, 1);
@@ -354,13 +326,13 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
             newSample = pix.at<float>(0, 0);
             if(newSample < oldSample)
                 break;
-                
+
             x1.x = tempx.x;
             x1.y = tempx.y;
             oldSample = newSample;
 
         }
-        
+
         // now do x2
         keepgoing = true;
         getRectSubPix(grad, Size(1,1), x2, pix);
@@ -380,7 +352,7 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
             newSample = pix.at<float>(0, 0);
             if(newSample < oldSample)
                 break;
-                
+
             x2.x = tempx.x;
             x2.y = tempx.y;
             oldSample = newSample;
@@ -388,16 +360,16 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
 
         stroke.length1 = max(.5, distCanvas(x1, anch));
         stroke.length2 = max(.5, distCanvas(x2, anch));
-        
-        
+
+
         if(verbose){
             std::cout << "for stroke at " << stroke.anchor << std::endl;
             std::cout << "  length 1: " << stroke.length1 << std::endl;
             std::cout << "  length 2: " << stroke.length2 << std::endl;
-   
+
         }
 
- 
+
     }
     if(verbose){
         std::cout << "Done clipping strokes..............." << std::endl;
@@ -407,7 +379,7 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
 void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     cv::Mat& blurimg = blurimages[lid];
     // for now, just use the color at the anchor point
-    
+
     if(verbose){
         std::cout << "Started coloring strokes" << std::endl;
     }
@@ -445,21 +417,9 @@ void Processor::makeDummyStroke(Brushstroke& stroke, Point2d ankh, double avgWb,
 
 void Processor::createRegenMask(cv::Mat& mask, int lid, double rmaskwidth){
     Mat threshimg; 
-    //Mat grayimg;
-    //cvtColor(blurimg, grayimg, CV_RGB2GRAY);    
-    //Mat gradX, gradY, grad;
-    //int kernelsize = 3;
-    //if(verbose){
-    //    std::cout << "creating RegenMask" << std::endl;
-    //    std::cout << "  kernelsize: " << kernelsize << std::endl;
-   // }
-
-    //Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
-    //Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
-    //magnitude(gradX, gradY, grad);
 
     Mat& grad = gradimages[lid];
-    
+
     double threshval = 10.0; 
 
     if(verbose){
@@ -469,7 +429,7 @@ void Processor::createRegenMask(cv::Mat& mask, int lid, double rmaskwidth){
 
     threshold(grad, threshimg, threshval, 255, 1);
     threshimg.convertTo(threshimg, CV_8U, 1);
-//    cvtColor(threshimg, threshimg, CV_RGB2GRAY);
+    //    cvtColor(threshimg, threshimg, CV_RGB2GRAY);
     threshold(threshimg, threshimg, 20, 255, 0);
 
     double erodekernel = rmaskwidth/2.0;
@@ -486,24 +446,37 @@ void Processor::createRegenMask(cv::Mat& mask, int lid, double rmaskwidth){
     if(verbose){
         displayImage(threshimg, "mask before hole-filling");
     }
-    
+
     Mat element = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
     morphologyEx(threshimg, threshimg,  MORPH_OPEN, element);
-    
+
     if(verbose){
         std::cout << "threshtype: " << threshimg.type() << std::endl;
         displayImage(threshimg, "mask after hole-filling");
     }
-    
-    
+
+
     resize(threshimg, mask, mask.size(), 0, 0, INTER_LINEAR);
     // set mask value
- 
+
 } 
 
 double Processor::distCanvas(Point2d& x1, Point2d& x2){
     double currdist = sqrt(((x1.x - x2.x)*(x1.x - x2.x)) + ((x1.y - x2.y)*(x1.y - x2.y)));
     return currdist * canvStyle.canvasScale*canvStyle.canvasScale;
+}
+
+void Processor::interpAngles(Layer& layer, LayerStyle& lstyle, int lid){
+    vector<Brushstroke> strongStrokes;
+    for(int i = 0; i < layer.strokes.size(); ++i){
+        Brushstroke& stroke = layer.strokes[i];
+        if(stroke.strength > lstyle.strengthThreshold){
+            strongStrokes.push_back(stroke);
+        }
+    }
+    std::cout << "strong strokes: " << strongStrokes.size() << std::endl;
+    layer.strokes = strongStrokes;
+
 }
 
 
@@ -520,12 +493,16 @@ void Processor::displayImage(cv::Mat& img, std::string windowName){
 
 
 
+
+
+
+
 void Processor::ignorethisblurImage(double kernelwidth, double kernelheight){
     Mat blurimg = image.clone();
     //for (int i = 1; i < max_kernel_length; i += 2){
-        // Size(w,h): size of the kernel to be used, with w, h odd and positive
-        // stdevx, stddevy... if pass in 0, calculated from kernel size
-        GaussianBlur(image, blurimg, Size(kernelwidth, kernelheight), 0, 0); 
+    // Size(w,h): size of the kernel to be used, with w, h odd and positive
+    // stdevx, stddevy... if pass in 0, calculated from kernel size
+    GaussianBlur(image, blurimg, Size(kernelwidth, kernelheight), 0, 0); 
     //}    
     image = blurimg;
 
@@ -533,12 +510,12 @@ void Processor::ignorethisblurImage(double kernelwidth, double kernelheight){
 
 void Processor::ignorethisdoSobel(int kernelsize){
     /* // Edge detection with Canny filter
-    Mat edges; 
-    int lowthresh = 1;
-    int kernelsize = 3;
-    Canny(blurimg, edges, lowthresh, lowthresh*3, kernelsize);
-    displayImage(edges, "edges!!");   
-    */
+       Mat edges; 
+       int lowthresh = 1;
+       int kernelsize = 3;
+       Canny(blurimg, edges, lowthresh, lowthresh*3, kernelsize);
+       displayImage(edges, "edges!!");   
+     */
 
     Mat grayimg;
     cvtColor(image, grayimg, CV_RGB2GRAY);
@@ -558,9 +535,9 @@ void Processor::ignorethisdoSobel(int kernelsize){
     //absgradX = abs(gradX);
     Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
     //convertScaleAbs(gradY, absgradY);
-   // absgradY = abs(gradY);
+    // absgradY = abs(gradY);
 
-    
+
     // Note that it matters whether you're dealing with bytes (gray) or ints
     std::cout << (absgradX.size == absgradY.size) << std::endl; 
     std::cout << gradX.depth() << std::endl;
@@ -570,7 +547,7 @@ void Processor::ignorethisdoSobel(int kernelsize){
 
 
 
-//    magnitude(absgradX, absgradY, grad);
+    //    magnitude(absgradX, absgradY, grad);
     magnitude(gradX, gradY, grad);
 
     namedWindow("gradWind", CV_WINDOW_AUTOSIZE);
@@ -622,7 +599,7 @@ void Processor::ignorethisplaceStrokes(){
         //std::cout << countstop << std::endl;
         int r = rand()%maskSize.height;
         int c = rand()%maskSize.width;                  
-       
+
         int rs = std::max(0, (int)(r-wr/2.0)); 
         int re = std::min((int)(r+wr/2.0), maskSize.height);
         int cs = std::max(0, (int)(c-wr/2.0));
@@ -641,10 +618,10 @@ void Processor::ignorethisplaceStrokes(){
         Brushstroke b;
         b.anchor = Point2d(c, r);
         strokes.push_back(b);
-                
 
 
-        
+
+
         //std::cout << "r: " << rs << ", " << re << std::endl;
         //std::cout << "c: " << cs << ", " << ce << std::endl;
 
@@ -655,9 +632,9 @@ void Processor::ignorethisplaceStrokes(){
         //maskimg.at<uchar>(re, ce) = 255;
 
         //Vec3b col = image.at<Vec3b>(Point(x/2,y/2));
-    
+
     }
-  
+
     //std::cout << countNonZero(maskimg) << std::endl;
 
     namedWindow("gradWind", CV_WINDOW_NORMAL);
@@ -665,10 +642,10 @@ void Processor::ignorethisplaceStrokes(){
     waitKey(0); 
 
     //std::cout << "postprocessing... fill in the holes" << std::endl;
-    
+
     for(int r = 0; r < maskSize.height; ++r){
         for(int c = 0; c < maskSize.width; ++c){
-       
+
             int rs = std::max(0, (int)(r-wr/2.0)); 
             int re = std::min((int)(r+wr/2.0), maskSize.height);
             int cs = std::max(0, (int)(c-wr/2.0));
@@ -693,13 +670,13 @@ void Processor::ignorethisplaceStrokes(){
     imshow("pWind", maskimg);
     waitKey(0); 
 
-   
+
 
 
 
     for (int i = 0; i < imgSize.height; ++i){
         for(int j = 0; j < imgSize.width; ++j){
-    
+
             if(maskimg.at<uchar>(i*2.0, j*2.0) > 100){
                 //image.at<Vec3b>(i,j) = {0, 0, 0};
             }
@@ -707,30 +684,30 @@ void Processor::ignorethisplaceStrokes(){
         }
     }
 
-//    display();
+    //    display();
 
 
-/*
-    for (int i = 0; i < imgSize.height; ++i){
-        for(int j = 0; j < imgSize.width; ++j){
+    /*
+       for (int i = 0; i < imgSize.height; ++i){
+       for(int j = 0; j < imgSize.width; ++j){
 
-            Vec3b col = image.at<Vec3b>(Point(j,i));
-                        
-            std::cout << (int)col[0] << ", " << (int)col[1] << ", " << (int)col[2] << std::endl;
+       Vec3b col = image.at<Vec3b>(Point(j,i));
+
+       std::cout << (int)col[0] << ", " << (int)col[1] << ", " << (int)col[2] << std::endl;
 
 
-        }
-    }  
-*/
+       }
+       }  
+     */
 
     std::cout << "strokes: " << strokes.size() << std::endl;
 
 
     // Oh gods okay let's add to this monstrosity... 
     // fill filler values for now... 
-    
+
     // angles!
-    
+
     std::cout << "starting brush setting" << std::endl;
     for (int i = 0; i < strokes.size(); ++i){
         Brushstroke& stroke = strokes[i];
@@ -745,7 +722,7 @@ void Processor::ignorethisplaceStrokes(){
         //std::cout << "original color: " << (int)col[0] << ", " << (int)col[1] << ", " << (int)col[2] << std::endl;
         stroke.color = Vec3d(col[2]/255.0, col[1]/255.0, col[0]/255.0);
         //std::cout << stroke.color[0] << ", " << stroke.color[1] << ", " << stroke.color[2] << std::endl;
-         //Vec3b col = image.at<Vec3b>(Point(x/2,y/2));
+        //Vec3b col = image.at<Vec3b>(Point(x/2,y/2));
         if (stroke.color[0] < .000001 && stroke.color[1] < .0000001 && stroke.color[2] < .0000001){
             std::cout << "0 at: " << stroke.anchor.x << ", " << stroke.anchor.y << std::endl;
         }
@@ -756,20 +733,20 @@ void Processor::ignorethisplaceStrokes(){
     Canvas canvas; 
     canvas.width = maskSize.width;
     canvas.height = maskSize.height;
-    
+
     std::vector<Layer> layers; 
     Layer onlyLayer;
     onlyLayer.strokes = strokes;
 
     layers.push_back(onlyLayer);
     canvas.layers = layers;
-    
+
 
     YAML::Emitter yout; 
     //YAML::Node canvasNode = YAML::Load(canvas);
     YAML::convert<Canvas> ccon;
     YAML::Node canvasNode = ccon.encode(canvas);
-        
+
 
     yout << canvasNode;
 
@@ -781,7 +758,7 @@ void Processor::ignorethisplaceStrokes(){
 
     //out << canvas;
     //YAML::Node canvasNode; 
-        
+
 
 }
 
