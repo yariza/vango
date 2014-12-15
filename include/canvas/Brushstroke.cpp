@@ -80,6 +80,8 @@ void Brushstroke::renderTexture(Mat& alphaMap, Mat& mask, RotatedRect& maskRect)
     int wid = x2-x1;
     int hig = y2-y1;
 
+    if (wid <= 0 || hig <= 0) return;
+
     Rect src_roi(x1 - boundingRect.x, y1 - boundingRect.y,
                                  wid, hig);
     Rect dst_roi(x1, y1, wid, hig);
