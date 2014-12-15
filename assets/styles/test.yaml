@@ -3,8 +3,8 @@ bg:
     opacity: 0.2
     tex_path: '../textures/tex/Canvas.png'
 layers:
-  - regen_width: 9.0
-    avg_brush_width: 10.0
+  - regen_width: 50.0
+    avg_brush_width: 100.0
     var_brush_width: 1.0
     max_brush_length: 20.0
     opacity: 0.9
@@ -16,8 +16,8 @@ layers:
     tex_blend: 0.3
     tex_spacing: 1.0
     tex_jitter: 0.0
-  - regen_width: 8.0
-    avg_brush_width: 3.0
+  - regen_width: 20.0
+    avg_brush_width: 25.0
     var_brush_width: 1.0
     max_brush_length: 10.0
     opacity: 0.7

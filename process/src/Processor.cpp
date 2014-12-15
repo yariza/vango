@@ -467,15 +467,29 @@ double Processor::distCanvas(Point2d& x1, Point2d& x2){
 }
 
 void Processor::interpAngles(Layer& layer, LayerStyle& lstyle, int lid){
+
     vector<Brushstroke> strongStrokes;
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
-        if(stroke.strength > lstyle.strengthThreshold){
+        if(stroke.strength >= lstyle.strengthThreshold){
             strongStrokes.push_back(stroke);
         }
     }
     std::cout << "strong strokes: " << strongStrokes.size() << std::endl;
-    layer.strokes = strongStrokes;
+
+    int numStrong = strongStrokes.size();
+    Scalar s = 0;
+    Mat maskimg(imgSize.height*scale, imgSize.width*scale, CV_8UC1, s);
+ 
+    Mat angdata(canvas.height, canvas.width, CV_8UC1, s);
+    Mat angMask(canvas.height, canvas.width, CV_8UC1, s);
+    Mat angresult(canvas.height, canvas.width, CV_8Uc1, s); 
+
+
+    for(int i = 0; i < numStrong; ++i){
+    }
+
+
 
 }
 
