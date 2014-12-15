@@ -18,17 +18,22 @@ void Brushstroke::draw(Mat& alphaMap, Mat& mask,
     RotatedRect maskRect;
     double texAngle;
     Size_<double> maskSize = mask.size();
+    double ratio = width / maskSize.width;
+
+    Mat scaledMask;
+    resize(mask, scaledMask, Size(), ratio, ratio, INTER_CUBIC);
+    maskSize = scaledMask.size();
 
     RNG rng(0xFFFFFFFF);
 
     for(double dist = -length2; dist < length1; dist += spacing) {
         texCenter = anchor + normal * dist;
-        texAngle = angle + jitter * rng.uniform(-1.0, 1.0); // add jitter later
+        texAngle = angle + jitter * rng.uniform(-1.0, 1.0);
 
         maskRect = RotatedRect(texCenter, maskSize, texAngle);
         Rect2d boundingRect = maskRect.boundingRect();
 
-        renderTexture(alphaMap, mask, maskRect);
+        renderTexture(alphaMap, scaledMask, maskRect);
     }
 }
 
