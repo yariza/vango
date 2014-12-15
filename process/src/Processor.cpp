@@ -479,10 +479,18 @@ void Processor::interpAngles(Layer& layer, LayerStyle& lstyle, int lid){
 
     int numStrong = strongStrokes.size();
     Scalar s = 0;
+<<<<<<< HEAD
  
     Mat angdata(canvas.height, canvas.width, CV_8UC1, s);
     Mat angMask(canvas.height, canvas.width, CV_8UC1, s);
     Mat angresult(canvas.height, canvas.width, CV_8UC1, s); 
+=======
+    Mat maskimg(imgSize.height*scale, imgSize.width*scale, CV_8UC1, s);
+ 
+    Mat angdata(canvas.height, canvas.width, CV_8UC1, s);
+    Mat angMask(canvas.height, canvas.width, CV_8UC1, s);
+    Mat angresult(canvas.height, canvas.width, CV_8Uc1, s); 
+>>>>>>> 4b258be87060f26418ebe4665d0dd6fd34c73b2d
 
 
     for(int i = 0; i < numStrong; ++i){

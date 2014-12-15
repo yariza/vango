@@ -18,7 +18,7 @@ void Brushstroke::draw(Mat& alphaMap, Mat& mask,
     RotatedRect maskRect;
     double texAngle;
     Size_<double> maskSize = mask.size();
-    double ratio = width / maskSize.width;
+    double ratio = (width + 2.0) / maskSize.width;
 
     Mat scaledMask;
     resize(mask, scaledMask, Size(), ratio, ratio, INTER_CUBIC);
