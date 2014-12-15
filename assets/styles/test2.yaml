@@ -1,4 +1,4 @@
-canvas_scale: 3.0
+canvas_scale: 2.0
 bg:
     opacity: 0.2
     tex_path: '../textures/tex/Paper.png'
@@ -22,7 +22,7 @@ layers:
     max_brush_length: 200.0
     opacity: 0.9
     regen_mask_width: 10.0
-    strength_threshold: 50.0
+    strength_threshold: 10.0
     strength_neighborhood: 5.0
     tex_path: '../textures/tex/Fuzystatic.png'
     mask_path: '../textures/mask/Dry Media Brushes_2.png'
@@ -35,7 +35,7 @@ layers:
     max_brush_length: 30.0
     opacity: 0.7
     regen_mask_width: 10.0
-    strength_threshold: 50.0
+    strength_threshold: 10.0
     strength_neighborhood: 5.0
     tex_path: '../textures/tex/Fuzystatic.png'
     mask_path: '../textures/mask/Dry Media Brushes_2.png'

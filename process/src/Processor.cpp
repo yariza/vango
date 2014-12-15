@@ -43,7 +43,10 @@ void Processor::initialize(std::string imgFile, std::string styleFile, bool verb
         Mat gradY;
         Mat grad;
 
-        int kernelsize = 3;
+        int kernelsize = canvStyle.layers[i].strengthNeighborhood;
+        if((int)(kernelsize/2.0) == kernelsize/2.0)
+            kernelsize ++;
+ 
 
         Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
         Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
