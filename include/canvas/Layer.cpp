@@ -10,6 +10,9 @@ void Layer::draw(Mat& colorMap, Mat& heightMap, LayerStyle& style, bool simple)
     Mat fg_c = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
     Mat fg_a = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
     Mat fg_h = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
+    Mat one_minus_beta = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
+    one_minus_beta.setTo(1 - style.textureBlend);
+    double beta = style.textureBlend;
 
     // Mat color = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
     tileTexture(style.texImage, fg_h);
@@ -29,7 +32,7 @@ void Layer::draw(Mat& colorMap, Mat& heightMap, LayerStyle& style, bool simple)
 
             stroke.draw(fg_a, mask, spacing, jitter);
 
-            fg_a = fg_a.mul(fg_h);
+            fg_a = fg_a.mul(one_minus_beta + fg_h*beta);
             blend(colorMap, heightMap, fg_c, fg_a, fg_h, layerOpacity*stroke.opacity);
         }
     }

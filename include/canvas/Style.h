@@ -20,6 +20,7 @@
 #define MASK_PATH_KEY "mask_path"
 #define TEX_SPACING_KEY "tex_spacing"
 #define TEX_JITTER_KEY "tex_jitter"
+#define BRUSH_TEXTURE_BLEND "tex_blend"
 
 using namespace cv;
 
@@ -44,6 +45,8 @@ public:
     Mat texImage;
     double texSpacing;
     double texJitter;
+
+    double textureBlend;
 
     bool loadTextures(std::string yamlPath);
 };
@@ -74,6 +77,7 @@ namespace YAML {
             node[MASK_PATH_KEY] = style.maskPath;
             node[TEX_SPACING_KEY] = style.texSpacing;
             node[TEX_JITTER_KEY] = style.texJitter;
+            node[BRUSH_TEXTURE_BLEND] = style.textureBlend;
             return node;
         }
 
@@ -93,6 +97,7 @@ namespace YAML {
             style.maskPath = node[MASK_PATH_KEY].as<std::string>();
             style.texSpacing = node[TEX_SPACING_KEY].as<double>();
             style.texJitter = node[TEX_JITTER_KEY].as<double>();
+            style.textureBlend = node[BRUSH_TEXTURE_BLEND].as<double>();
 
             return true;
         }
