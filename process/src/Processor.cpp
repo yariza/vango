@@ -247,7 +247,7 @@ void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     Mat pix;
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
-        Point anch = Point2d(stroke.anchor.x/scale, stroke.anchor.y/scale);
+        Point2d anch = Point2d(stroke.anchor.x/scale, stroke.anchor.y/scale);
 
         getRectSubPix(gradXimages[lid], Size(1, 1), anch, pix);
         float gradX = pix.at<float>(0, 0);
@@ -257,7 +257,7 @@ void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, int lid){
         float grad = pix.at<float>(0, 0);        
 
 
-        stroke.angle = atan2(gradY, gradX);
+        stroke.angle = atan2(gradY, gradX) + PI/2;
         float gradthresh = 10;        
 
         if(grad > gradthresh){
@@ -311,9 +311,10 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
 
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
-        Point2d x1 = Point2d(stroke.anchor.x/scale, stroke.anchor.y/scale);
-        Point2d x2 = Point2d(x1);
-        Point2d tempx = Point2d(x2);
+        Point2d anch = Point2d(stroke.anchor.x/scale, stroke.anchor.y/scale);
+        Point2d x1 = Point2d(anch);
+        Point2d x2 = Point2d(anch);
+        Point2d tempx = Point2d(anch);
         Mat pix;
         getRectSubPix(grad, Size(1, 1), x1, pix);
         float oldSample = pix.at<float>(0, 0);
@@ -326,7 +327,7 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
             tempx.x = x1.x + dirX;
             tempx.y = x1.y + dirY;
 
-            if(dist(tempx, stroke.anchor) > maxLength)
+            if(distCanvas(tempx, anch) > maxLength)
                 break;
 
             getRectSubPix(grad, Size(1,1), tempx, pix);
@@ -352,7 +353,7 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
             tempx.x = x2.x - dirX;
             tempx.y = x2.y - dirY;
 
-            if(dist(tempx, stroke.anchor) > maxLength)
+            if(distCanvas(tempx, anch) > maxLength)
                 break;
 
             getRectSubPix(grad, Size(1,1), tempx, pix);
@@ -365,8 +366,8 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
             oldSample = newSample;
         }   
 
-        stroke.length1 = max(.5, dist(x1, stroke.anchor));
-        stroke.length2 = max(.5, dist(x2, stroke.anchor));
+        stroke.length1 = max(.5, distCanvas(x1, anch));
+        stroke.length2 = max(.5, distCanvas(x2, anch));
         
         
         if(verbose){
@@ -397,12 +398,7 @@ void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, int lid){
         Brushstroke& stroke = layer.strokes[i];
         // use blurred image when getting color 
         col = blurimg.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y / scale));
-        if(stroke.strength > .000001){
-            stroke.color = BGR_TO_RGBDOUBLE(col);
-        }
-        else{
-            stroke.color = BGR_TO_RGBDOUBLE(Vec3b(0, 0, 0));
-        }
+        stroke.color = BGR_TO_RGBDOUBLE(col);
 
         if(verbose){
             std::cout << " Set color at stroke " << stroke.anchor << " to " << stroke.color << std::endl;
@@ -485,8 +481,9 @@ void Processor::createRegenMask(cv::Mat& mask, int lid, double rmaskwidth){
  
 } 
 
-double Processor::dist(Point2d& x1, Point2d& x2){
-    return sqrt(((x1.x - x2.x)*(x1.x - x2.x)) + ((x1.y - x2.y)*(x1.y - x2.y)));
+double Processor::distCanvas(Point2d& x1, Point2d& x2){
+    double currdist = sqrt(((x1.x - x2.x)*(x1.x - x2.x)) + ((x1.y - x2.y)*(x1.y - x2.y)));
+    return currdist * canvStyle.canvasScale*canvStyle.canvasScale;
 }
 
 
