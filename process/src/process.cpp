@@ -44,11 +44,15 @@ void parseCommandLine(int argc, char** argv){
 
 int main(int argc, char** argv) {
     parseCommandLine(argc, argv);
+
+    std::cout << "running on " << imgFile << " using " << styleFile << std::endl;
     
     processor.initialize(imgFile, styleFile, verby);
 
     processor.processImage();
     
-    if(actuallyWrite)
+    if(actuallyWrite){
+        std::cout << "writing to " << outFile << std::endl;
         processor.saveToFile(outFile);    
+    }
 }

@@ -280,7 +280,7 @@ void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, int lid){
         std::cout << "finished initial angling" << std::endl;
     }
 
-    interpAngles(layer, lstyle, lid);
+    //interpAngles(layer, lstyle, lid);
 }
 
 void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
@@ -479,11 +479,10 @@ void Processor::interpAngles(Layer& layer, LayerStyle& lstyle, int lid){
 
     int numStrong = strongStrokes.size();
     Scalar s = 0;
-    Mat maskimg(imgSize.height*scale, imgSize.width*scale, CV_8UC1, s);
  
     Mat angdata(canvas.height, canvas.width, CV_8UC1, s);
     Mat angMask(canvas.height, canvas.width, CV_8UC1, s);
-    Mat angresult(canvas.height, canvas.width, CV_8Uc1, s); 
+    Mat angresult(canvas.height, canvas.width, CV_8UC1, s); 
 
 
     for(int i = 0; i < numStrong; ++i){
