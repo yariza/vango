@@ -1,0 +1,14 @@
+canvas_scale: 2.0
+layers:
+  - regen_width: 9.0
+    avg_brush_width: 5.0
+    var_brush_width: 1.0
+    max_brush_length: 20.0
+    opacity: 0.9
+    regen_mask_width: 10.0
+    strength_threshold: 0.9
+    strength_neighborhood: 5.0
+    tex_path: '../textures/tex/Fuzystatic.png'
+    mask_path: '../textures/mask/M Brushes_1.png'
+    tex_spacing: 1.0
+    tex_jitter: 0.0

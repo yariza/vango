@@ -239,8 +239,47 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
 }
 
 void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, int lid){
+    if(verbose){
+        std::cout << "angling those strokes man" << std::endl;
+
+    }
+    double scale = canvStyle.canvasScale; 
+    Mat pix;
+    for(int i = 0; i < layer.strokes.size(); ++i){
+        Brushstroke& stroke = layer.strokes[i];
+        Point anch = Point2d(stroke.anchor.x/scale, stroke.anchor.y/scale);
+
+        getRectSubPix(gradXimages[lid], Size(1, 1), anch, pix);
+        float gradX = pix.at<float>(0, 0);
+        getRectSubPix(gradYimages[lid], Size(1, 1), anch, pix);
+        float gradY = pix.at<float>(0, 0);
+        getRectSubPix(gradYimages[lid], Size(1, 1), anch, pix);
+        float grad = pix.at<float>(0, 0);        
 
 
+        stroke.angle = atan2(gradY, gradX);
+        float gradthresh = 10;        
+
+        if(grad > gradthresh){
+            stroke.strength = 10;
+        }
+        else{
+            stroke.strength = 0;
+        }
+        
+
+        if(verbose){
+            std::cout << "At stroke " << stroke.anchor << std::endl;
+            std::cout << "  grad: " << gradX << ", " << gradY << std::endl;
+            std::cout << "  angle: " << stroke.angle << std::endl;
+
+        }
+
+    }
+
+    if(verbose){
+        std::cout << "finished angling" << std::endl;
+    }
 }
 
 void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
@@ -262,7 +301,8 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     Mat& grad = gradimages[lid];
 
     double maxLength = lstyle.maxBrushLength/2.0;     
-
+    double scale = canvStyle.canvasScale;
+    
     if(verbose){
         Mat sobelimg;
         grad.convertTo(sobelimg, CV_8U, 1);
@@ -271,9 +311,9 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
 
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
-        Point2d x1 = Point2d(stroke.anchor);
-        Point2d x2 = Point2d(stroke.anchor);
-        Point2d tempx = Point2d(stroke.anchor);
+        Point2d x1 = Point2d(stroke.anchor.x/scale, stroke.anchor.y/scale);
+        Point2d x2 = Point2d(x1);
+        Point2d tempx = Point2d(x2);
         Mat pix;
         getRectSubPix(grad, Size(1, 1), x1, pix);
         float oldSample = pix.at<float>(0, 0);
@@ -357,7 +397,12 @@ void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, int lid){
         Brushstroke& stroke = layer.strokes[i];
         // use blurred image when getting color 
         col = blurimg.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y / scale));
-        stroke.color = BGR_TO_RGBDOUBLE(col);
+        if(stroke.strength > .000001){
+            stroke.color = BGR_TO_RGBDOUBLE(col);
+        }
+        else{
+            stroke.color = BGR_TO_RGBDOUBLE(Vec3b(0, 0, 0));
+        }
 
         if(verbose){
             std::cout << " Set color at stroke " << stroke.anchor << " to " << stroke.color << std::endl;

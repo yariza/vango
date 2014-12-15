@@ -8,12 +8,16 @@ std::string imgFile;
 std::string styleFile;
 std::string outFile;
 bool actuallyWrite; 
+bool verby;
 
 Processor processor; 
 
 void parseCommandLine(int argc, char** argv){
     try {
         CmdLine cmd("Vango Process", ' ', "0.001");
+
+        SwitchArg verbyArg("v", "verbose", "enable debugging information");
+        cmd.add(verbyArg);
 
         ValueArg<string> outFileName("o", "output", "output yaml file to write the canvas information to", false, "", "string");
         cmd.add(outFileName);
@@ -29,8 +33,8 @@ void parseCommandLine(int argc, char** argv){
         imgFile = imgFileName.getValue();
         styleFile = styleFileName.getValue();
         outFile = outFileName.getValue();
-        std::cout << outFile << std::endl;
-        
+        verby = verbyArg.getValue();       
+ 
         actuallyWrite = (outFile != "");
     } 
     catch (ArgException &e) { 
@@ -41,7 +45,7 @@ void parseCommandLine(int argc, char** argv){
 int main(int argc, char** argv) {
     parseCommandLine(argc, argv);
     
-    processor.initialize(imgFile, styleFile, true);
+    processor.initialize(imgFile, styleFile, verby);
 
     processor.processImage();
     
