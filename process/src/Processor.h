@@ -40,7 +40,7 @@ private:
     void colorStrokes(Layer& layer, LayerStyle& lstyle, int lid);
     
     void makeDummyStroke(Brushstroke& stroke, cv::Point2d ankh, double avgWb, double dWb, double opac);
-    void createRegenMask(cv::Mat& mask, int lid, double rmaskwidth);
+    void createRegenMask(cv::Mat& mask, int lid, LayerStyle& lstyle);
     double distCanvas(cv::Point2d& x1, cv::Point2d& x2);
     void interpAngles(Layer& layer, LayerStyle& lstyle, int lid);
     void displayImage(cv::Mat& img, std::string windowName);

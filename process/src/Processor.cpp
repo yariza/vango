@@ -147,7 +147,7 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     Size maskSize = maskimg.size();
     // if regenMaskWidth == 0, this is the bottom layer and should subsequently be fully covered
     if (lstyle.regenMaskWidth > .00000001){
-        createRegenMask(maskimg, lid, lstyle.regenMaskWidth);        
+        createRegenMask(maskimg, lid, lstyle);        
     }
 
     for(int i = 0; i < k; ++i){
@@ -415,12 +415,13 @@ void Processor::makeDummyStroke(Brushstroke& stroke, Point2d ankh, double avgWb,
 
 }
 
-void Processor::createRegenMask(cv::Mat& mask, int lid, double rmaskwidth){
+void Processor::createRegenMask(cv::Mat& mask, int lid, LayerStyle& lstyle){
     Mat threshimg; 
 
     Mat& grad = gradimages[lid];
 
-    double threshval = 10.0; 
+    double rmaskwidth = lstyle.regenMaskWidth;
+    double threshval = lstyle.strengthThreshold; 
 
     if(verbose){
         std::cout << "  thresholding..." << std::endl;
@@ -479,18 +480,10 @@ void Processor::interpAngles(Layer& layer, LayerStyle& lstyle, int lid){
 
     int numStrong = strongStrokes.size();
     Scalar s = 0;
-<<<<<<< HEAD
  
     Mat angdata(canvas.height, canvas.width, CV_8UC1, s);
     Mat angMask(canvas.height, canvas.width, CV_8UC1, s);
     Mat angresult(canvas.height, canvas.width, CV_8UC1, s); 
-=======
-    Mat maskimg(imgSize.height*scale, imgSize.width*scale, CV_8UC1, s);
- 
-    Mat angdata(canvas.height, canvas.width, CV_8UC1, s);
-    Mat angMask(canvas.height, canvas.width, CV_8UC1, s);
-    Mat angresult(canvas.height, canvas.width, CV_8Uc1, s); 
->>>>>>> 4b258be87060f26418ebe4665d0dd6fd34c73b2d
 
 
     for(int i = 0; i < numStrong; ++i){
