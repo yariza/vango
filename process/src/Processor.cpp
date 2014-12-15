@@ -422,7 +422,9 @@ void Processor::createRegenMask(cv::Mat& mask, int lid, LayerStyle& lstyle){
 
     double rmaskwidth = lstyle.regenMaskWidth;
     double threshval = lstyle.strengthThreshold; 
-
+    if((int)(threshval/2.0) == threshval/2.0)
+        threshval ++;
+ 
     if(verbose){
         std::cout << "  thresholding..." << std::endl;
         std::cout << "  threshvalue: " << threshval << std::endl;

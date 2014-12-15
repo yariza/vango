@@ -1,15 +1,45 @@
-canvas_scale: 2.0
+canvas_scale: 3.0
+bg:
+    opacity: 0.2
+    tex_path: '../textures/tex/Paper.png'
 layers:
-  - regen_width: 9.0
-    avg_brush_width: 5.0
-    var_brush_width: 1.0
-    max_brush_length: 20.0
+  - regen_width: 50.0
+    avg_brush_width: 100.0
+    var_brush_width: 20.0
+    max_brush_length: 1000.0
     opacity: 0.9
-    regen_mask_width: 10.0
-    strength_threshold: 0.9
+    regen_mask_width: 0.0
+    strength_threshold: 50.0
     strength_neighborhood: 5.0
     tex_path: '../textures/tex/Fuzystatic.png'
-    mask_path: '../textures/mask/M Brushes_1.png'
-    text_blend: .9
+    mask_path: '../textures/mask/Dry Media Brushes_2.png'
+    tex_blend: 0.3
     tex_spacing: 1.0
     tex_jitter: 0.0
+  - regen_width: 20.0
+    avg_brush_width: 25.0
+    var_brush_width: 3.0
+    max_brush_length: 200.0
+    opacity: 0.9
+    regen_mask_width: 10.0
+    strength_threshold: 50.0
+    strength_neighborhood: 5.0
+    tex_path: '../textures/tex/Fuzystatic.png'
+    mask_path: '../textures/mask/Dry Media Brushes_2.png'
+    tex_spacing: 1.0
+    tex_jitter: 0.7
+    tex_blend: 0.7
+  - regen_width: 8.0
+    avg_brush_width: 5.0
+    var_brush_width: 1.0
+    max_brush_length: 30.0
+    opacity: 0.7
+    regen_mask_width: 10.0
+    strength_threshold: 50.0
+    strength_neighborhood: 5.0
+    tex_path: '../textures/tex/Fuzystatic.png'
+    mask_path: '../textures/mask/Dry Media Brushes_2.png'
+    tex_spacing: 1.0
+    tex_jitter: 0.7
+    tex_blend: 0.7
+
