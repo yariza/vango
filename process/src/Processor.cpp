@@ -467,11 +467,11 @@ double Processor::distCanvas(Point2d& x1, Point2d& x2){
 }
 
 void Processor::interpAngles(Layer& layer, LayerStyle& lstyle, int lid){
-
+/*
     vector<Brushstroke> strongStrokes;
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
-        if(stroke.strength >= lstyle.strengthThreshold){
+        if(stroke.strength > lstyle.strengthThreshold){
             strongStrokes.push_back(stroke);
         }
     }
@@ -497,7 +497,7 @@ void Processor::interpAngles(Layer& layer, LayerStyle& lstyle, int lid){
     }
 
 
-
+*/
 }
 
 
