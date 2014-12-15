@@ -243,34 +243,54 @@ void Processor::angleStrokes(Layer& layer, LayerStyle& lstyle, int lid){
         std::cout << "angling those strokes man" << std::endl;
 
     }
+
+    /*
+    Mat grayimg;
+    cvtColor(blurimages[lid], grayimg, CV_RGB2GRAY);    
+    Mat gradX;
+    Mat gradY;
+    Mat grad;
+
+    int kernelsize = 3;
+
+    Sobel(grayimg, gradX, CV_32F, 1, 0, kernelsize, 1.0, 0, BORDER_DEFAULT); 
+    Sobel(grayimg, gradY, CV_32F, 0, 1, kernelsize, 1.0, 0, BORDER_DEFAULT);
+    magnitude(gradX, gradY, grad);
+ 
+    if(verbose){
+        Mat sobelimg;
+        grad.convertTo(sobelimg, CV_8U, 1);
+        displayImage(sobelimg, "angle sobel gradient");
+    }
+    */
+
+    Mat& grad = gradimages[lid];
+    Mat& gradX = gradXimages[lid];
+    Mat& gradY = gradYimages[lid];
+    
+
     double scale = canvStyle.canvasScale; 
     Mat pix;
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
         Point2d anch = Point2d(stroke.anchor.x/scale, stroke.anchor.y/scale);
 
-        getRectSubPix(gradXimages[lid], Size(1, 1), anch, pix);
-        float gradX = pix.at<float>(0, 0);
-        getRectSubPix(gradYimages[lid], Size(1, 1), anch, pix);
-        float gradY = pix.at<float>(0, 0);
-        getRectSubPix(gradYimages[lid], Size(1, 1), anch, pix);
-        float grad = pix.at<float>(0, 0);        
+        getRectSubPix(gradX, Size(1, 1), anch, pix);
+        float bgradX = pix.at<float>(0, 0);
+        getRectSubPix(gradY, Size(1, 1), anch, pix);
+        float bgradY = pix.at<float>(0, 0);
+        getRectSubPix(grad, Size(1, 1), anch, pix);
+        float bgrad = pix.at<float>(0, 0);        
 
 
-        stroke.angle = atan2(gradY, gradX) + PI/2;
+        stroke.angle = atan2(bgradY, bgradX) + PI/2;
         float gradthresh = 10;        
 
-        if(grad > gradthresh){
-            stroke.strength = 10;
-        }
-        else{
-            stroke.strength = 0;
-        }
-        
+        stroke.strength = bgrad; 
 
         if(verbose){
             std::cout << "At stroke " << stroke.anchor << std::endl;
-            std::cout << "  grad: " << gradX << ", " << gradY << std::endl;
+            std::cout << "  grad: " << bgradX << ", " << bgradY << std::endl;
             std::cout << "  angle: " << stroke.angle << std::endl;
 
         }
