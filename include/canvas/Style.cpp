@@ -67,8 +67,30 @@ bool LayerStyle::loadTextures(std::string yamlPath)
     return true;
 }
 
+bool BackgroundLayerStyle::loadTextures(std::string yamlPath)
+{
+    namespace fs = boost::filesystem;
+    fs::path yamlDir = (fs::path(yamlPath)).parent_path();
+
+    fs::path bgAbsPath = yamlDir / fs::path(texPath);
+
+    texImage = imread(bgAbsPath.native(), CV_LOAD_IMAGE_COLOR);
+
+    texImage.convertTo(texImage, CV_64FC3);
+    texImage /= UCHAR_MAX;
+
+    if (texImage.data == NULL) {
+        std::cerr << "error: unable to load texture " << bgAbsPath.native() << std::endl;
+        return false;
+    }
+    return true;
+}
+
 bool CanvasStyle::loadTextures(std::string yamlPath)
 {
+    if (!bgStyle.loadTextures(yamlPath))
+        return false;
+
     for (uint i=0; i<layers.size(); i++) {
         if (!layers[i].loadTextures(yamlPath))
             return false;

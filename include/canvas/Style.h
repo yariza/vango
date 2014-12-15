@@ -7,6 +7,8 @@
 #define CANVAS_SCALE_KEY "canvas_scale"
 #define STYLE_LAYERS_KEY "layers"
 
+#define BACKGROUND_KEY "bg"
+
 #define REGEN_WIDTH_KEY "regen_width"
 #define AVG_BRUSH_WIDTH_KEY "avg_brush_width"
 #define VAR_BRUSH_WIDTH_KEY "var_brush_width"
@@ -51,10 +53,16 @@ public:
     bool loadTextures(std::string yamlPath);
 };
 
+class BackgroundLayerStyle : public LayerStyle {
+public:
+    bool loadTextures(std::string yamlPath);
+};
+
 class CanvasStyle {
 public:
     double canvasScale;
     std::vector<LayerStyle> layers;
+    BackgroundLayerStyle bgStyle;
 
     bool loadTextures(std::string yamlPath);
 };
@@ -104,11 +112,32 @@ namespace YAML {
     };
 
     template<>
+    struct convert<BackgroundLayerStyle> {
+        static Node encode(const BackgroundLayerStyle& style) {
+            Node node;
+            node[STYLE_OPACITY_KEY] = style.opacity;
+            node[TEX_PATH_KEY] = style.texPath;
+            return node;
+        }
+
+        static bool decode(const Node& node, LayerStyle& style) {
+            if (!node.IsMap())
+                return false;
+
+            style.opacity = node[STYLE_OPACITY_KEY].as<double>();
+            style.texPath = node[TEX_PATH_KEY].as<std::string>();
+
+            return true;
+        }
+    };
+
+    template<>
     struct convert<CanvasStyle> {
         static Node encode(const CanvasStyle& style) {
             Node node;
             node[CANVAS_SCALE_KEY] = style.canvasScale;
             node[STYLE_LAYERS_KEY] = style.layers;
+            node[BACKGROUND_KEY] = style.bgStyle;
             return node;
         }
 
@@ -120,6 +149,8 @@ namespace YAML {
             for (int i=0; i<node[STYLE_LAYERS_KEY].size(); i++) {
                 style.layers.push_back(node[STYLE_LAYERS_KEY][i].as<LayerStyle>());
             }
+
+            style.bgStyle = node[BACKGROUND_KEY].as<BackgroundLayerStyle>();
             return true;
         }
     };

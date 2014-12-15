@@ -1,7 +1,7 @@
 #ifndef __CANVAS_H__
 #define __CANVAS_H__
 
-#include "Layer.h"
+#include "BackgroundLayer.h"
 
 #define CANVAS_WIDTH_KEY "width"
 #define CANVAS_HEIGHT_KEY "height"
@@ -15,6 +15,7 @@ public:
     int width;
     int height;
     std::vector<Layer> layers;
+    BackgroundLayer background;
 
     void draw(Mat& color, Mat& height, CanvasStyle& style, bool simple);
 };

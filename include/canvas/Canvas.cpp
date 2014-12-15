@@ -2,6 +2,7 @@
 
 void Canvas::draw(Mat& color, Mat& height, CanvasStyle& style, bool simple)
 {
+    background.draw(color, height, style.bgStyle, simple);
     for (uint i=0; i<layers.size(); i++) {
         std::cout << "Drawing Layer " << i+1 << "/" << layers.size() << "..." << std::endl;
         Layer& layer = layers[i];
