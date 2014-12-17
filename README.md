@@ -2,7 +2,7 @@
 
 Painterly representation of images.
 
-![Our glorious campus](./results/columbia2.png)
+![Our glorious campus](./results/columbia2_textured.png)
 
 ## Usage
 
