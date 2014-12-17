@@ -1,6 +1,7 @@
 #ifndef __STYLE_H__
 #define __STYLE_H__
 
+#include "Brushstroke.h"
 #include <yaml-cpp/yaml.h>
 #include <opencv2/opencv.hpp>
 
@@ -18,6 +19,7 @@
 #define CLIP_THRESHOLD_KEY "clip_threshold"
 #define STRENGTH_THRESHOLD_KEY "strength_threshold"
 #define STRENGTH_NEIGHBORHOOD_KEY "strength_neighborhood"
+#define VAR_COLOR_KEY "var_color"
 
 #define TEX_PATH_KEY "tex_path"
 #define MASK_PATH_KEY "mask_path"
@@ -51,6 +53,7 @@ public:
     double texJitter;
 
     double textureBlend;
+    Vec3d colorVariance;
 
     bool loadTextures(std::string yamlPath);
 };
@@ -89,6 +92,7 @@ namespace YAML {
             node[TEX_SPACING_KEY] = style.texSpacing;
             node[TEX_JITTER_KEY] = style.texJitter;
             node[BRUSH_TEXTURE_BLEND] = style.textureBlend;
+            node[VAR_COLOR_KEY] = style.colorVariance;
             return node;
         }
 
@@ -110,7 +114,7 @@ namespace YAML {
             style.texSpacing = node[TEX_SPACING_KEY].as<double>();
             style.texJitter = node[TEX_JITTER_KEY].as<double>();
             style.textureBlend = node[BRUSH_TEXTURE_BLEND].as<double>();
-
+            style.colorVariance = node[VAR_COLOR_KEY].as<Vec3d>();
             return true;
         }
     };

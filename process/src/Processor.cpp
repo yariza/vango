@@ -432,12 +432,24 @@ void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     }
 
     Vec3b col; 
+    Vec3d colVar = lstyle.colorVariance;
+    RNG rng(0xFFFFFFFF);
     double scale = canvStyle.canvasScale;
     for(int i = 0; i < layer.strokes.size(); ++i){
         Brushstroke& stroke = layer.strokes[i];
         // use blurred image when getting color 
         col = blurimg.at<Vec3b>(Point(stroke.anchor.x / scale, stroke.anchor.y / scale));
         stroke.color = BGR_TO_RGBDOUBLE(col);
+
+        Vec3d colOffset;
+        colOffset[0] = rng.uniform(-colVar[0], colVar[0]);
+        colOffset[1] = rng.uniform(-colVar[1], colVar[1]);
+        colOffset[2] = rng.uniform(-colVar[2], colVar[2]);
+
+        stroke.color += colOffset;
+        stroke.color[0] = CLAMP(stroke.color[0], 0, 1);
+        stroke.color[1] = CLAMP(stroke.color[1], 0, 1);
+        stroke.color[2] = CLAMP(stroke.color[2], 0, 1);
 
         if(verbose){
             std::cout << " Set color at stroke " << stroke.anchor << " to " << stroke.color << std::endl;
