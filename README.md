@@ -113,8 +113,9 @@ The algorithms in this project follow the following papers:
 
 Additionally, a subset of the sample images were proved by Bernhard Siegl (burtn.deviantart.com) 
 These are: 
-    - [fieldmountain](http://burtn.deviantart.com/art/Fall-Meadows-492564897)
-    - [fogmountain](http://burtn.deviantart.com/art/Over-The-Fog-2nd-493889140)
-    - [snow](http://burtn.deviantart.com/art/She-Fawn-Is-Lie-Want-427795357)
-    - [sunsetswamp](http://burtn.deviantart.com/art/Dead-Swamp-450659144) 
+ 
+  - [fieldmountain](http://burtn.deviantart.com/art/Fall-Meadows-492564897)
+  - [fogmountain](http://burtn.deviantart.com/art/Over-The-Fog-2nd-493889140)
+  - [snow](http://burtn.deviantart.com/art/She-Fawn-Is-Lie-Want-427795357)
+  - [sunsetswamp](http://burtn.deviantart.com/art/Dead-Swamp-450659144) 
 
