@@ -327,7 +327,7 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
 
     double scale = canvStyle.canvasScale;
     double maxLength = lstyle.maxBrushLength/2.0/scale/scale;     
-    double diffthresh = -1.0;
+    double diffthresh = -lstyle.clipThreshold;
     
     if(verbose){
         Mat sobelimg;

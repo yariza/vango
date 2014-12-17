@@ -15,6 +15,7 @@
 #define MAX_BRUSH_LENGTH_KEY "max_brush_length"
 #define STYLE_OPACITY_KEY "opacity"
 #define REGEN_MASK_WIDTH_KEY "regen_mask_width"
+#define CLIP_THRESHOLD_KEY "clip_threshold"
 #define STRENGTH_THRESHOLD_KEY "strength_threshold"
 #define STRENGTH_NEIGHBORHOOD_KEY "strength_neighborhood"
 
@@ -37,6 +38,7 @@ public:
 
     double regenMaskWidth;
 
+    double clipThreshold; 
     double strengthThreshold;
     double strengthNeighborhood;
 
@@ -79,6 +81,7 @@ namespace YAML {
             node[MAX_BRUSH_LENGTH_KEY] = style.maxBrushLength;
             node[STYLE_OPACITY_KEY] = style.opacity;
             node[REGEN_MASK_WIDTH_KEY] = style.regenMaskWidth;
+            node[CLIP_THRESHOLD_KEY] = style.clipThreshold;
             node[STRENGTH_THRESHOLD_KEY] = style.strengthThreshold;
             node[STRENGTH_NEIGHBORHOOD_KEY] = style.strengthNeighborhood;
             node[TEX_PATH_KEY] = style.texPath;
@@ -99,6 +102,7 @@ namespace YAML {
             style.maxBrushLength = node[MAX_BRUSH_LENGTH_KEY].as<double>();
             style.opacity = node[STYLE_OPACITY_KEY].as<double>();
             style.regenMaskWidth = node[REGEN_MASK_WIDTH_KEY].as<double>();
+            style.clipThreshold = node[CLIP_THRESHOLD_KEY].as<double>();
             style.strengthThreshold = node[STRENGTH_THRESHOLD_KEY].as<double>();
             style.strengthNeighborhood = node[STRENGTH_NEIGHBORHOOD_KEY].as<double>();
             style.texPath = node[TEX_PATH_KEY].as<std::string>();
