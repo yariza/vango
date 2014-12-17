@@ -1,6 +1,6 @@
 # Vango
 
-Painterly represenation of images.
+Painterly representation of images.
 
 ![Our glorious campus](./results/columbia2.png)
 
