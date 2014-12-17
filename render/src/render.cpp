@@ -6,11 +6,23 @@
 using namespace cv;
 using namespace TCLAP;
 
+// Input canvas filename
 std::string canvasFile;
+
+// Input style filename
 std::string styleFile;
+
+// Output PNG filename
 std::string outputFile;
+
+// Auto-generate output filename based on canvas path
 bool autoOutput;
+
+// Is displaying output on screen enabled?
 bool displayEnabled;
+
+// Is Simple mode enabled? In this mode, rendering textures is disabled, and
+// instead lines are drawn with full opacity.
 bool simpleMode;
 
 Renderer renderer;
