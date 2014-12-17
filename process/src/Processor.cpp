@@ -407,8 +407,6 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
             displayImage(sobelimg, "stroke");
         }
 
-
-
         if(verbose){
             std::cout << "for stroke at " << stroke.anchor << std::endl;
             std::cout << "  length 1: " << stroke.length1 << std::endl;
@@ -423,6 +421,7 @@ void Processor::clipStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     }
 }
 
+// Give the stroke a color based on image color at anchor point
 void Processor::colorStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     cv::Mat& blurimg = blurimages[lid];
     // for now, just use the color at the anchor point
@@ -474,9 +473,9 @@ void Processor::makeDummyStroke(Brushstroke& stroke, Point2d ankh, double avgWb,
 
 }
 
+// Create a mask around high-frequency areas of the blurred image per layer
 void Processor::createRegenMask(cv::Mat& mask, int lid, LayerStyle& lstyle){
     Mat threshimg; 
-
     Mat& grad = gradimages[lid];
 
     double rmaskwidth = lstyle.regenMaskWidth;
@@ -491,9 +490,9 @@ void Processor::createRegenMask(cv::Mat& mask, int lid, LayerStyle& lstyle){
 
     threshold(grad, threshimg, threshval, 255, 1);
     threshimg.convertTo(threshimg, CV_8U, 1);
-    //    cvtColor(threshimg, threshimg, CV_RGB2GRAY);
     threshold(threshimg, threshimg, 20, 255, 0);
 
+    // grow the high frequency area by an amount changed by regenMaskWidth
     rmaskwidth = max(rmaskwidth, 2.0);
     double erodekernel = rmaskwidth/2.0;
     if((int)(erodekernel/2.0) == erodekernel/2.0)
