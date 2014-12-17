@@ -2,7 +2,7 @@
 
 ### Goal:
 
-Output a file with:
+Process an image and ultimately output a file with:
 
 - Canvas:
     - width
@@ -10,67 +10,51 @@ Output a file with:
     - Vector <Brushstroke> layers[num layers]
             
 - Brushstroke:
-    - Point(x,y) Anchor
-    - double Angle (radians)
-    - double Length 1 
-    - double Length 2
-    - double Width
-    - double Opacity (0-1)
-    - Color Color
-    - Texture Texture
-    - Strength 
+    - Point2d anchor: Position of stroke on canvas (x, y)
+    - double angle: Orientation of stroke (radians)
+    - double length1: Length along angle
+    - double length2: Length opposite angle
+    - double width: Width of stroke
+    - double opacity: Opacity of stroke (0-1)
+    - Vec3d color: RGB color of stroke
+    - double strength: In progress 
 
 ### Algorithm
 
 1. Read in source image and 'style' config file (which defines parameters for things like the number of layers, brush width/layer, max length/layer, etc)... 
 
 2. Initialize layers, each of size source * scale... 
-For each layer, have:
-    - wb: brush width (maybe with some random variation?)
-    - dwb: max variation in width
-    - wr: regen width (determine how densely packed the brushstrokes are)
-    - brush type (and texture...)
-    - palette reduction (although may be part of render instead)
-    - opacity? (or vary per brushstroke?)
-
+  1. For each layer but the top, create a blurred image with kernel proportional to brushstroke width
+  2. Calculate the Sobel gradients on the blurred image
 3. For each layer... 
   1. Determine position of brushstrokes: 
         - Find all "anchor points" of each brushstroke...
-        - This is a pseudorandom process (to limit artifacts), and attempts to fill all areas of size wr x wr with at least one stroke. 
+        - This is a pseudorandom process (to limit artifacts), and attempts to fill all areas of size regenMaskWidth*regenMaskWidth with at least one stroke. 
         - For k iterations... 
             - choose random (x,y) on the canvas
-            - if there is no anchor in the wr x wr space... create a new brushstroke with
+            - if there is no anchor in the regenWidth*regenWidth space, then create a new brushstroke with
                 (x,y) as its anchorpoint... 
-            - else... choose new point? 
-            - When k is done, or when you've been unable to place your point p consecutive
-                times, then... check whether your canvas is fully covered? 
-                - I guess this should be done by scanning... check each wr x wr grid
-                    in scanline method and see if it's empty... if yes, place your 
-                    point there... 
+            - else... choose new point 
+            - When k is done, or when you've been unable to place your point stopthresh consecutive
+                times, then use scanline procedure to ensure that the canvas is appropriately covered
+                - Check each regenWidth*regenWidth area in scanline procedure and, if it's empty of brush-anchors and                     in the target area, create a brushstroke there
         - Caveat for when not in bottom layer:
             - Brushstroke regeneration area limited to areas near high frequency data... 
-            - Possible way to accomplish this is to find the high frequency data and create a mask, and discard any points that land outside this. This seems foolish, though, because clearly with the highest layers you'll be discarding the majority of your data, since the high frequency area will (presumably) be a small fraction of the image. Possible improvement is by determining a mapping algorithm that maps a point outside the permissable region into it somehow. 
-  2. Width parameter
+            - To accomplish this, create a mask around high-frequency areas (plus some lee-way determined by regenMaskWidth and disallow any points to be generated outside of it
+  2. Width parameter per stroke
         - Is a function of the layer width + some random variance
-  3. Opacity parameter
-        - For now, constant per layer... with lower opacity higher up
-        - Eventually, may want to implement a way to have opacity vary based on the importance of the stroke and its layering (e.g. if there's already multiple brushstrokes covering the same area, probably shouldn't be completely opaque)
-  4. Texture parameter
-        - Not applicable to process
-  5. Angle
+  3. Opacity parameter per stroke
+        - Constant variable per layer
+  4. Angle
         - To determine orientation... 
-        - First (on your layer which is blurred by a gaussian kernel with width proportional to wb)... estimate gradients with a Sobel filter. 
-        - Brushstrokes which fall on gradients greater than some stylistically determined threshhold and not near other "strong" brushstrokes are marked as strong... 
-            - How do you determine strength of neighbors? Maybe would be beneficial to have a nearest-neighbor graph or something
-        - Something something radial basis function... which allows you to interpolate gradients from the 'strong' brushstrokes... and then angle = atan(ygrad, xgrad) + PI/2
-        - It seems that as a general rule, rbfs are more or less weighted sums of 'training data' based on the distance from your known point to your unknown point... 
-
-        - For now though... it may be better to just use the gradient at that location, and then add that functionality in later. 
+        - First (on your layer which is blurred by a gaussian kernel with width proportional to avgBrushWidth)... estimate gradients with a Sobel filter. 
+        - Set the angle perpendicular to the gradient direction (i.e. the direction of strongest change)
+        - For future work, perhaps angles along "weak" gradients should be discarded, and the value interpolated from neighboring strokes
   6. Strength... 
-        - If using the rbf method, a brushstroke is marked as 'strong' iff the gradient at the anchor point is above some parameter-defined threshhold
-  7. Length 1, 2
-        - They have a thing called 'edge clipping'... don't allow a brushstroke to cross an edge. 
-        - So first, find all edges: Run canny edge detection on all your (blurred(unless top)) layers to get your edges. 
+        - For future work, angles will be interpolated if strength (determined by gradient at the stroke) is under a threshold value
+  7. Lengths 1, 2
+        - Strokes are cut using an edge-clipping algorithm that prevent them from crossing lines in the image 
+        - A line is found if the Sobel-gradient magnitudes drop past a given threshold between two sampled values
         - Clip the brushstrokes to the edges according to "Processing Images and Video for an Impressionist Effect":
             - Start at anchor cx, cy
             - "Grow" the line in the orientation direction until maxLength is reached or an edge is detected (an edge is considered found if the magnitude of the gradient decreases in the direction of the stroke being grown)
@@ -85,6 +69,4 @@ For each layer, have:
     8. set lastSample to newSample
     9. go to step c.
   8. Color...
-        - The article says to find all the pixels that lie under the stroke and average them... So basically 'rasterize' the width * length rectangle that is the stroke, find out the pixels it lands on, and average their colors... 
-        - May be easiest(?) to just draw the rectangle in openGL to get a mask and use that... wow what a hack. 
-        - For now... maybe just use the linearly interpolated color at the anchor point? Say look at the neighborhood around the anchor point
+        - Take the color in the blurred image at the anchor point, plus some parameterized random color jitter
