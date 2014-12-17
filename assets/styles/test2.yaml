@@ -1,4 +1,4 @@
-canvas_scale: 2.0
+canvas_scale: 1.0
 bg:
     opacity: 0.2
     tex_path: '../textures/tex/Paper.png'
