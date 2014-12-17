@@ -19,17 +19,7 @@ public:
     void processImage();
     void saveToFile(std::string outFile);    
 
-
-
-
-    void ignorethisblurImage(double kernelwidth = 11, double kernelheight = 11);
-
-    void ignorethisdoSobel(int kernelsize = 3);
-    
-    void ignorethisdisplay(std::string windowName="window");
-
-    void ignorethisplaceStrokes();
-
+    // flag for debugging information
     bool verbose;     
 
 private:
@@ -45,8 +35,11 @@ private:
     void interpAngles(Layer& layer, LayerStyle& lstyle, int lid);
     void displayImage(cv::Mat& img, std::string windowName);
 
+    // input image
     cv::Mat image;
+    // Blurred images, one per layer
     std::vector<cv::Mat> blurimages; 
+    // Stored gradient values... X, Y, magnitude respectively
     std::vector<cv::Mat> gradXimages;
     std::vector<cv::Mat> gradYimages;
     std::vector<cv::Mat> gradimages;
