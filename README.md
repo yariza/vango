@@ -2,6 +2,8 @@
 
 Converting pictures to painterlings. Woo!
 
+![Our glorious campus](./results/columbia2.png)
+
 ## Setup
 
 This project is split into two main tasks:
