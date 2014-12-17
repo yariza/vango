@@ -1,3 +1,5 @@
+mkdir assets/canvas;
+
 for name in "$@"; do
 
     echo;

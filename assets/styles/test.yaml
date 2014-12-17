@@ -16,4 +16,5 @@ layers:
     tex_blend: 0.3
     tex_spacing: 1.0
     tex_jitter: 0.0
+    clip_threshold: 1.0
     var_color: [0.5, 0.5, 0.5]
