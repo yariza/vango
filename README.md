@@ -111,7 +111,7 @@ The algorithms in this project follow the following papers:
 [Peter Litwinowicz, Processing images and video for an impressionistic effect, Proceedings of the 24th annual conference on Computer graphics and interactive techniques, p. 407-414, August 1997.](http://www.cs.virginia.edu/~dbrogan/CS551.851.animation.sp.2000/Papers/p407-litwinowicz.pdf)
 
 
-Additionally, a subset of the sample images were proved by Bernhard Siegl (burtn.deviantart.com) 
+Additionally, a subset of the sample images were used from stock images by Bernhard Siegl (burtn.deviantart.com) 
 These are: 
  
   - [fieldmountain](http://burtn.deviantart.com/art/Fall-Meadows-492564897)
