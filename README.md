@@ -106,15 +106,15 @@ associated layers and strokes, of the rendered image.
     
 The algorithms in this project follow the following papers: 
 
-James Hays, Irfan Essa, Image and video based painterly animation, Proceedings of the 3rd international symposium on Non-photorealistic animation and rendering, June 07-09, 2004, Annecy, France.   
+[James Hays, Irfan Essa, Image and video based painterly animation, Proceedings of the 3rd international symposium on Non-photorealistic animation and rendering, June 07-09, 2004, Annecy, France.](http://cs.brown.edu/~hays/papers/IVBPA_Final.pdf)
  
-Peter Litwinowicz, Processing images and video for an impressionistic effect, Proceedings of the 24th annual conference on Computer graphics and interactive techniques, p. 407-414, August 1997.
+[Peter Litwinowicz, Processing images and video for an impressionistic effect, Proceedings of the 24th annual conference on Computer graphics and interactive techniques, p. 407-414, August 1997.](http://www.cs.virginia.edu/~dbrogan/CS551.851.animation.sp.2000/Papers/p407-litwinowicz.pdf)
 
 
 Additionally, a subset of the sample images were proved by Bernhard Siegl (burtn.deviantart.com) 
 These are: 
-    - [fieldmountain.png]()
-    - [fogmountain.png]()
-    - [snow.png]()
-    - [sunsetswamp.png]() 
+    - [fieldmountain](http://burtn.deviantart.com/art/Fall-Meadows-492564897)
+    - [fogmountain](http://burtn.deviantart.com/art/Over-The-Fog-2nd-493889140)
+    - [snow](http://burtn.deviantart.com/art/She-Fawn-Is-Lie-Want-427795357)
+    - [sunsetswamp](http://burtn.deviantart.com/art/Dead-Swamp-450659144) 
 
