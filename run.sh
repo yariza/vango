@@ -4,7 +4,7 @@ for name in "$@"; do
     echo $name;
 
     cd process/build;
-    ./process -i "../../assets/imagesin/"$name".png" -s "../../assets/styles/"$name".yaml" -o "../../assets/canvas/"$name".yaml";
+    ./process -i "../../assets/input_images/"$name".png" -s "../../assets/styles/"$name".yaml" -o "../../assets/canvas/"$name".yaml";
 
     cd -;
 
