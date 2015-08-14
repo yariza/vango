@@ -41,7 +41,12 @@ namespace YAML {
             canvas.width = node[CANVAS_WIDTH_KEY].as<int>();
             canvas.height = node[CANVAS_HEIGHT_KEY].as<int>();
             for (int i=0; i<node[CANVAS_LAYERS_KEY].size(); i++) {
-                canvas.layers.push_back(node[CANVAS_LAYERS_KEY][i].as<Layer>());
+                if (!node[CANVAS_LAYERS_KEY][i].IsSequence()) {
+                    Layer l;
+                    canvas.layers.push_back(l);
+                } else {
+                    canvas.layers.push_back(node[CANVAS_LAYERS_KEY][i].as<Layer>());
+                }
             }
             return true;
         }
