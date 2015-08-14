@@ -1,0 +1,65 @@
+canvas_scale: 1.0
+bg:
+    opacity: 0.2
+    tex_path: '../textures/tex/Canvas.png'
+layers:
+  - regen_width: 160.0
+    avg_brush_width: 200.0
+    var_brush_width: 40.0
+    max_brush_length: 1200.0
+    opacity: 0.95
+    regen_mask_width: 0.0
+    strength_threshold: 30.0
+    strength_neighborhood: 5.0
+    tex_path: '../textures/tex/Fuzystatic.png'
+    mask_path: '../textures/mask/Dry Media Brushes_2.png'
+    tex_blend: 0.3
+    tex_spacing: 5.0
+    tex_jitter: 5.0
+    clip_threshold: 1.0
+    var_color: [0.0, 0.0, 0.0]
+  - regen_width: 100.0
+    avg_brush_width: 150.0
+    var_brush_width: 40.0
+    max_brush_length: 900.0
+    opacity: 0.7
+    regen_mask_width: 200.0
+    strength_threshold: 50.0
+    strength_neighborhood: 5.0
+    tex_path: '../textures/tex/Fuzystatic.png'
+    mask_path: '../textures/mask/Dry Media Brushes_2.png'
+    tex_blend: 0.3
+    tex_spacing: 5.0
+    tex_jitter: 2.0 
+    clip_threshold: 1.0
+    var_color: [0.0, 0.0, 0.0]
+  - regen_width: 60.0
+    avg_brush_width: 70.0
+    var_brush_width: 10.0
+    max_brush_length: 200.0
+    opacity: 0.5
+    regen_mask_width: 80.0
+    strength_threshold: 30.0
+    strength_neighborhood: 5.0
+    tex_path: '../textures/tex/Noise.png'
+    mask_path: '../textures/mask/Dry Media Brushes_5.png'
+    tex_spacing: 1.0
+    tex_jitter: 0.7
+    tex_blend: 0.7
+    clip_threshold: 1.0
+    var_color: [0.0, 0.0, 0.0]
+  - regen_width: 20.0
+    avg_brush_width: 30.0
+    var_brush_width: 5.0
+    max_brush_length: 80.0
+    opacity: 0.9
+    regen_mask_width: 40.0
+    strength_threshold: 50.0
+    strength_neighborhood: 5.0
+    tex_path: '../textures/tex/Fuzystatic.png'
+    mask_path: '../textures/mask/Dry Media Brushes_6.png'
+    tex_blend: 0.3
+    tex_spacing: 1.0
+    tex_jitter: 2.0
+    clip_threshold: 1.0
+    var_color: [0.0, 0.0, 0.0]

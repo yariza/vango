@@ -152,11 +152,11 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     int countstop = 0;    
     double wrhalf = lstyle.regenWidth / 2.0;
 
-    if(verbose){
+    // if(verbose){
         std::cout << "buildingStrokes!" << std::endl;
         std::cout << "  k: " << k << std::endl;
         std::cout << "  stopthresh: " << stopthresh << std::endl;
-    }
+    // }
 
     // Create a mask to store placed brushstrokes and allowed placement locations
     // On higher layers, only place strokes near high frequency areas
@@ -173,9 +173,9 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
     // If there is already a stroke in its neighborhood, discard it and try again
     for(int i = 0; i < k; ++i){
         if(countstop > stopthresh){
-            if(verbose){
+            // if(verbose){
                 std::cout << "breaking: reached stopthresh" << std::endl;
-            }
+            // }
             break;
         }
         
@@ -202,6 +202,7 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
                 std::cout << "  rejected" << std::endl;
                 std::cout << "  countstop: " << countstop << std::endl;
             }
+            std::cout << "!";
             continue;
         }
         
@@ -222,12 +223,14 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
         }
 
         layer.strokes.push_back(b);
+        std::cout << ".";
     }
 
     if(verbose){
         displayImage(maskimg, "Before postprocessing");
         std::cout << "-------------Postprocessing stroke generation----------------" << std::endl;
     }
+    std::cout << lid << ": made " << layer.strokes.size() << " strokes" << std::endl;
 
     // Once you tried and stopped the random stroke-placements, go through the image 
     // in scanline fashion and fill in the holes
@@ -259,6 +262,7 @@ void Processor::buildStrokes(Layer& layer, LayerStyle& lstyle, int lid){
             }
 
             layer.strokes.push_back(b);
+            std::cout << ".";
         }
     }
 
