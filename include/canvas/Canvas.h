@@ -29,7 +29,8 @@ namespace YAML {
             node[CANVAS_WIDTH_KEY] = canvas.width;
             node[CANVAS_HEIGHT_KEY] = canvas.height;
             for (uint i=0; i<canvas.layers.size(); i++) {
-                node[CANVAS_LAYERS_KEY].push_back(canvas.layers[i]);
+                if (canvas.layers[i].strokes.size() > 1)
+                    node[CANVAS_LAYERS_KEY].push_back(canvas.layers[i]);
             }
             return node;
         }
