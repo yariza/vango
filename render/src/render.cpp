@@ -25,6 +25,8 @@ bool displayEnabled;
 // instead lines are drawn with full opacity.
 bool simpleMode;
 
+int videoFrames;
+
 Renderer renderer;
 
 void debugLog(Canvas canvas, CanvasStyle style)
@@ -81,6 +83,9 @@ void parseCommandLine(int argc, char** argv)
         SwitchArg simpleArg("p", "simple-paint", "enable simple mode (runs faster)");
         cmd.add(simpleArg);
 
+        ValueArg<int> videoFramesArg("v", "video-frames", "frames for video output", false, 0, "int");
+        cmd.add(videoFramesArg);
+
         cmd.parse(argc, argv);
 
         canvasFile = canvasFileName.getValue();
@@ -89,6 +94,7 @@ void parseCommandLine(int argc, char** argv)
         autoOutput = autoOutputSwitch.getValue();
         displayEnabled = displayArg.getValue();
         simpleMode = simpleArg.getValue();
+        videoFrames = videoFramesArg.getValue();
 
         // std::cout << "run process on " << canvasFile << " as determined by " << styleFile << "..." << std::endl;
     }
@@ -109,40 +115,144 @@ void loadCanvas()
     if (!style.loadTextures(styleFile))
         exit(1);
 
-    renderer.load(canvas, style);
+    renderer.load(canvas, style, simpleMode);
+}
+
+std::string filePathForName(std::string outputName)
+{
+    if (outputName == "" && !autoOutput)
+        return "";
+
+    namespace fs = boost::filesystem;
+
+    std::string writeFile = outputName;
+    std::string directoryName = fs::path(outputName).stem().native();
+
+    fs::path canvasPath = fs::path(canvasFile);
+    std::string canvasName = canvasPath.stem().native();
+
+    if (autoOutput) {
+        directoryName = canvasName;
+    }
+
+    fs::path writePath = fs::path(outputName).parent_path();
+    if (autoOutput) {
+        writePath = fs::current_path();
+    }
+    writePath /= directoryName;
+
+    // make this directory if it doesn't exist already
+    create_directory(writePath);
+
+    writePath /= (canvasName + ".png");
+
+    writeFile = writePath.native();
+
+    return writeFile;
+}
+
+std::string filePathForName(std::string outputName, int frameNumber)
+{
+    if (outputName == "" && !autoOutput)
+        return "";
+
+    namespace fs = boost::filesystem;
+
+    std::string writeFile = outputName;
+    std::string directoryName = fs::path(outputName).stem().native();
+
+    fs::path canvasPath = fs::path(canvasFile);
+    std::string canvasName = canvasPath.stem().native();
+
+    if (autoOutput) {
+        directoryName = canvasName;
+    }
+
+    fs::path writePath = fs::path(outputName).parent_path();
+    if (autoOutput) {
+        writePath = fs::current_path();
+    }
+    writePath /= directoryName;
+
+    // make this directory if it doesn't exist already
+    create_directory(writePath);
+
+    std::ostringstream oss;
+    oss << std::setfill('0') << std::setw(5) << frameNumber;
+    writePath /= (canvasName + "_" + oss.str());
+
+    writePath.replace_extension(fs::path("png"));
+    writeFile = writePath.native();
+
+    return writeFile;
 }
 
 int main(int argc, char** argv )
 {
     parseCommandLine(argc, argv);
 
-    std::string writeFile = outputFile;
-
-    namespace fs = boost::filesystem;
-    if (autoOutput) {
-        fs::path writePath = fs::current_path();
-        fs::path canvasPath = fs::path(canvasFile);
-        writePath /= canvasPath.filename();
-        writePath.replace_extension(fs::path("png"));
-
-        writeFile = writePath.native();
-
-        std::cout << writeFile << std::endl;
-    }
-
     loadCanvas();
 
     // debugLog(renderer.canvas, renderer.style);
 
     renderer.initialize();
-    renderer.draw(simpleMode);
 
-    if (displayEnabled) {
-        renderer.display(true, true);
+    if (videoFrames > 1) {
+
+        int totalStrokes = 0;
+        for (int i=0; i<renderer.canvas.layers.size(); i++) {
+            Layer& layer = renderer.canvas.layers[i];
+            totalStrokes += layer.strokes.size();
+        }
+        int currentLayerIndex = 0;
+        int currentLayerStrokeIndex = 0;
+        int strokeCount = 0;
+        int currentFrame = 0;
+        while (strokeCount < totalStrokes) {
+            std::cout << "rendering frame " << currentFrame << "..." << std::endl;
+            int newStrokeCount = totalStrokes * currentFrame / videoFrames;
+            while (strokeCount < newStrokeCount) {
+                Layer& currentLayer = renderer.canvas.layers[currentLayerIndex];
+                // check if currentLayerStrokeIndex has reached capacity
+                // if so, increment layer and reset value
+                if (currentLayer.strokes.size() <= currentLayerStrokeIndex) {
+                    currentLayerIndex++;
+                    currentLayerStrokeIndex = 0;
+                }
+                int maxStrokes = newStrokeCount - strokeCount;
+                int strokesForLayer = currentLayer.strokes.size() - currentLayerStrokeIndex;
+                strokesForLayer = (strokesForLayer < maxStrokes) ? strokesForLayer : maxStrokes;
+
+                std::cout << ">Drawing Layer " << currentLayerIndex
+                          << " - strokes " << currentLayerStrokeIndex
+                          << " to " << (currentLayerStrokeIndex + strokesForLayer) << std::endl;
+                renderer.draw(currentLayerIndex, currentLayerStrokeIndex, strokesForLayer);
+
+                // update values
+                strokeCount += strokesForLayer;
+                currentLayerStrokeIndex += strokesForLayer;
+            }
+
+            if (displayEnabled) {
+                renderer.display(true, false);
+            }
+            std::string filePath = filePathForName(outputFile, currentFrame);
+            if (filePath != "") {
+                renderer.writeToFile(filePath);
+                std::cout << "Wrote output to " << filePath << std::endl;
+            }
+            currentFrame++;
+        }
     }
-
-    if (writeFile != "") {
-        renderer.writeToFile(writeFile);
-        std::cout << "Wrote output to " << writeFile << std::endl;
+    else {
+        renderer.draw();
+        if (displayEnabled) {
+            renderer.display(true, true);
+        }
+        std::string filePath = filePathForName(outputFile);
+        if (filePath != "") {
+            renderer.writeToFile(filePath);
+            std::cout << "Wrote output to " << filePath << std::endl;
+        }
     }
 }

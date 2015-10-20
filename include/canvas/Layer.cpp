@@ -39,6 +39,45 @@ void Layer::draw(Mat& colorMap, Mat& heightMap, LayerStyle& style, bool simple)
     std::cout << "done." << std::endl;
 }
 
+void Layer::draw(Mat& colorMap, Mat& heightMap, LayerStyle& style, bool simple,
+                 int brushStrokeIndex, int numBrushStrokes)
+{
+    Mat& mask = style.maskImage;
+    double spacing = style.texSpacing;
+    double jitter = style.texJitter;
+    double layerOpacity = style.opacity;
+
+    Mat fg_c = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
+    Mat fg_a = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
+    Mat fg_h = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
+    Mat one_minus_beta = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
+    one_minus_beta.setTo(1 - style.textureBlend);
+    double beta = style.textureBlend;
+
+    // Mat color = Mat::zeros(colorMap.rows, colorMap.cols, CV_64FC3);
+    tileTexture(style.texImage, fg_h);
+
+    for (uint i=brushStrokeIndex; i<brushStrokeIndex+numBrushStrokes; i++) {
+        std::cout << "\r  [" << (i+1) << " / " << strokes.size() << "] strokes...   ";
+
+        Brushstroke& stroke = strokes[i];
+
+        if (simple) {
+            stroke.simpleDraw(colorMap, heightMap);
+        }
+        else {
+            fg_c.setTo(Vec3d(stroke.color[2], stroke.color[1], stroke.color[0]));
+            fg_a.setTo(0); // clear alpha map
+
+            stroke.draw(fg_a, mask, spacing, jitter);
+
+            fg_a = fg_a.mul(one_minus_beta + fg_h*beta);
+            blend(colorMap, heightMap, fg_c, fg_a, fg_h, layerOpacity*stroke.opacity);
+        }
+    }
+    std::cout << "done." << std::endl;
+}
+
 void Layer::blend(Mat& colorMap, Mat& heightMap,
                   Mat& fg_c, Mat& fg_a, Mat& fg_h,
                   double opacity)

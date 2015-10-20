@@ -12,6 +12,8 @@ public:
     std::vector<Brushstroke> strokes;
 
     virtual void draw(Mat& color, Mat& height, LayerStyle& style, bool simple);
+    void draw(Mat& color, Mat& height, LayerStyle& style, bool simple,
+              int brushStrokeIndex, int numBrushStrokes);
     void blend(Mat& colorMap, Mat& heightMap,
                       Mat& fg_c, Mat& fg_a, Mat& fg_h,
                       double opacity);

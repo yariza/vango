@@ -18,6 +18,8 @@ public:
     BackgroundLayer background;
 
     void draw(Mat& color, Mat& height, CanvasStyle& style, bool simple);
+    void draw(Mat& color, Mat& height, CanvasStyle& style, bool simple, int layerIndex, int brushStrokeIndex, int numBrushStrokes);
+    void drawBackground(Mat& color, Mat& height, CanvasStyle& style, bool simple);
 };
 
 namespace YAML {

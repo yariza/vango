@@ -5,10 +5,11 @@ using namespace cv;
 Renderer::Renderer(): canvas(), style()
 {}
 
-void Renderer::load(Canvas my_canvas, CanvasStyle my_style)
+void Renderer::load(Canvas my_canvas, CanvasStyle my_style, bool my_simpleMode)
 {
     canvas = my_canvas;
     style = my_style;
+    simpleMode = my_simpleMode;
 }
 
 void Renderer::display(bool newWindow, bool wait)
@@ -28,17 +29,23 @@ void Renderer::initialize()
     height = Mat::zeros(canvas.height, canvas.width, CV_64FC3);
 
     color.setTo(Vec3d(1,1,1));
+    canvas.drawBackground(color, height, style, simpleMode);
 }
 
-void Renderer::draw(bool simpleMode)
+void Renderer::draw()
 {
     canvas.draw(color, height, style, simpleMode);
 }
 
+void Renderer::draw(int layerIndex, int brushStrokeIndex, int numBrushStrokes)
+{
+    canvas.draw(color, height, style, simpleMode,
+                layerIndex, brushStrokeIndex, numBrushStrokes);
+}
+
 void Renderer::writeToFile(std::string path)
 {
-    color *= 255.;
     Mat outImage = Mat::zeros(canvas.height, canvas.width, CV_8UC3);
-    color.convertTo(outImage, CV_8UC3);
+    color.convertTo(outImage, CV_8UC3, 255.);
     imwrite(path, outImage);
 }
